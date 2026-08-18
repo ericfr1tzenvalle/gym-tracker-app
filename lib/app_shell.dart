@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gym_tracker_app/pages/evolution_page.dart';
+import 'package:gym_tracker_app/pages/home_page.dart';
+import 'package:gym_tracker_app/pages/profile_page.dart';
+import 'package:gym_tracker_app/pages/workouts_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -8,11 +12,17 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
+  final List _pages = [
+    const HomePage(),
+    const WorkoutsPage(),
+    const EvolutionPage(),
+    const ProfilePage(),
+  ];
   int _selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const Text('Testando'),
+      body: _pages[_selectedIndex],
 
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (index){
