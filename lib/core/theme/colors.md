@@ -2,6 +2,7 @@
 
 A identidade visual foi definida em uma abordagem mais underground, com estética quase monocromática e detalhes em carmesim para reforçar contraste, energia e destaque visual.
 
+
 ## Paleta principal
 
 ### Base escura
