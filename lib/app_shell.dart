@@ -25,15 +25,12 @@ class _AppShellState extends State<AppShell> {
       body: _pages[_selectedIndex],
 
       bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (index){
+        onDestinationSelected: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
-        backgroundColor: Colors.white,
         selectedIndex: _selectedIndex,
-        animationDuration: const Duration(milliseconds: 400),
-        indicatorColor: Colors.purpleAccent,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
