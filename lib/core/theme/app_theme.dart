@@ -18,10 +18,11 @@ abstract final class AppTheme {
       ),
       dividerColor: AppColors.border,
       textTheme: const TextTheme(
-        headlineLarge: TextStyle( // Títulos principais
+        headlineSmall: TextStyle( // Títulos principais
+          fontFamily: 'SacredHertz',
           color: AppColors.textPrimary,
-          fontWeight: FontWeight.bold,
-          fontSize: 32,
+          fontWeight: FontWeight.w400,
+          fontSize: 24,
         ),
         bodyLarge: TextStyle( // Textos principais
           color: AppColors.textPrimary,
