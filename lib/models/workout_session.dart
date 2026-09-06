@@ -19,6 +19,4 @@ class WorkoutSession {
   }) : sets = sets ?? [];
 
   bool get isActive => status == WorkoutSessionStatus.active;
-
-
 }

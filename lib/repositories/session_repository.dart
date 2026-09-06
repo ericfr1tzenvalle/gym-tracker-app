@@ -4,6 +4,8 @@ import '../models/workout_session.dart';
 
 class SessionRepository {
   final List<WorkoutSession> _sessions = [];
+  int _nextSessionId = 1;
+  int _nextSetId = 1;
 
   List<WorkoutSession> findAll() => List.unmodifiable(_sessions);
 
@@ -17,75 +19,99 @@ class SessionRepository {
     return null;
   }
 
-  WorkoutSession? findActiveSession(){
-    for (var session in _sessions) {
+  WorkoutSession? findActiveSession() {
+    for (final session in _sessions) {
       if (session.status == WorkoutSessionStatus.active) {
         return session;
       }
-      
     }
     return null;
   }
 
-  bool addSession(WorkoutSession session){
-    WorkoutSession? _session = findById(session.id);
-    if(_session != null || findActiveSession() != null) return false;
+  WorkoutSession startOrResumeSession(String workoutId) {
+    final activeSession = findActiveSession();
+    if (activeSession != null) return activeSession;
+
+    final session = WorkoutSession(
+      id: _nextSessionId.toString(),
+      startedAt: DateTime.now(),
+      workoutId: workoutId,
+      completedAt: null,
+      sets: [],
+      status: WorkoutSessionStatus.active,
+    );
+
     _sessions.add(session);
-    return true;
+    _nextSessionId++;
+    return session;
   }
 
-  bool completeSession(String idSession){
-    WorkoutSession? session = findById(idSession);
-    if(session == null || !session.isActive) return false;
+  bool completeSession(String sessionId) {
+    final session = findById(sessionId);
+    if (session == null || !session.isActive) return false;
     session.completedAt = DateTime.now();
-    session.status  = WorkoutSessionStatus.completed;
+    session.status = WorkoutSessionStatus.completed;
     return true;
   }
 
-  bool cancelSession(String idSession){
-    WorkoutSession? session = findById(idSession);
-    if(session == null || !session.isActive) return false;
+  bool cancelSession(String sessionId) {
+    final session = findById(sessionId);
+    if (session == null || !session.isActive) return false;
     session.status = WorkoutSessionStatus.cancelled;
     return true;
-    
   }
 
-  bool removeSession(String idSession){
-  WorkoutSession? session = findById(idSession);
-  if(session == null) return false;
-    _sessions.removeWhere((session) => session.id == idSession);
-    return true;
-  }
-
-  bool addSetToSession(String sessionId, WorkoutSet set){
+  bool removeSession(String sessionId) {
     final session = findById(sessionId);
-    if(session == null || !session.isActive) return false;
-
-    final getAlreadyExist = session.sets.any((s) => s.id == set.id);
-    if(getAlreadyExist) return false;
-
-    session.sets.add(set);
+    if (session == null) return false;
+    _sessions.removeWhere((session) => session.id == sessionId);
     return true;
   }
 
-  List<WorkoutSet> getSetsFromSession(String sessionId){
-    WorkoutSession? session = findById(sessionId);
-    if(session == null) return [];
+  WorkoutSet? addSetToSession({
+    required String sessionId,
+    required String exerciseId,
+    required double weight,
+    required int repetitions,
+    int? rpe,
+  }) {
+    final session = findById(sessionId);
+    if (session == null || !session.isActive) return null;
+
+    final createdSet = WorkoutSet(
+      id: _nextSetId.toString(),
+      exerciseId: exerciseId,
+      weight: weight,
+      repetitions: repetitions,
+      rpe: rpe,
+    );
+
+    session.sets.add(createdSet);
+    _nextSetId++;
+    return createdSet;
+  }
+
+  List<WorkoutSet> getSetsFromSession(String sessionId) {
+    final session = findById(sessionId);
+    if (session == null) return [];
     return List.unmodifiable(session.sets);
   }
 
-  bool removeSetFromSession(String sessionId, WorkoutSet set) {
+  bool removeSetFromSession({
+    required String sessionId,
+    required String setId,
+  }) {
     final session = findById(sessionId);
     if (session == null || !session.isActive) {
       return false;
     }
 
-    final setExists = session.sets.any((item) => item.id == set.id);
+    final setExists = session.sets.any((workoutSet) => workoutSet.id == setId);
     if (!setExists) {
       return false;
     }
 
-    session.sets.removeWhere((s) => s.id == set.id);
+    session.sets.removeWhere((workoutSet) => workoutSet.id == setId);
     return true;
   }
 
@@ -96,6 +122,4 @@ class SessionRepository {
     sessions.sort((a, b) => b.startedAt.compareTo(a.startedAt));
     return sessions;
   }
-
-
 }

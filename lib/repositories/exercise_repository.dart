@@ -15,7 +15,6 @@ class ExerciseRepository {
     return null;
   }
 
-  
   bool add(Exercise exercise) {
     if (findById(exercise.id) != null) {
       return false;

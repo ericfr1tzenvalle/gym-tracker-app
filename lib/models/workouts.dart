@@ -5,9 +5,6 @@ class Workout {
   final String name;
   final List<Exercise> exercises;
 
-  Workout({
-    required this.id,
-    required this.name,
-    List<Exercise>? exercises,
-  })  : exercises = exercises ?? [];
+  Workout({required this.id, required this.name, List<Exercise>? exercises})
+    : exercises = exercises ?? [];
 }
