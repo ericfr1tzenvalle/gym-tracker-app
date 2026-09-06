@@ -12,6 +12,4 @@ class WorkoutSet {
     required this.repetitions,
     this.rpe,
   });
-
-  
 }

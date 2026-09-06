@@ -1,5 +1,1 @@
-enum WorkoutSessionStatus {
-  active,
-  completed,
-  cancelled,
-}
+enum WorkoutSessionStatus { active, completed, cancelled }

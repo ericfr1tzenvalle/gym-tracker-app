@@ -3,6 +3,7 @@ import '../models/workouts.dart';
 
 class WorkoutRepository {
   final List<Workout> _workouts = [];
+  int _nextWorkoutId = 1;
 
   List<Workout> findAll() => List.unmodifiable(_workouts);
 
@@ -20,12 +21,18 @@ class WorkoutRepository {
     return workout.exercises.any((exercise) => exercise.id == exerciseId);
   }
 
-  bool add(Workout workout) {
-    if (findById(workout.id) != null) {
+  bool add(String name) {
+    if (findById(_nextWorkoutId.toString()) != null) {
       return false;
     }
 
+    final workout = Workout(
+      id: _nextWorkoutId.toString(),
+      name: name,
+      exercises: [],
+    );
     _workouts.add(workout);
+    _nextWorkoutId++;
     return true;
   }
 
@@ -61,10 +68,7 @@ class WorkoutRepository {
       return false;
     }
 
-    workout.exercises.removeWhere(
-      (exercise) => exercise.id == exerciseId,
-    );
+    workout.exercises.removeWhere((exercise) => exercise.id == exerciseId);
     return true;
   }
-
 }

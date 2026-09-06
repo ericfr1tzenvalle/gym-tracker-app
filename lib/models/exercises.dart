@@ -4,7 +4,7 @@ class Exercise {
   final String id;
   final String name;
   final MuscleGroup muscleGroup;
-  final String?  description;
+  final String? description;
 
   const Exercise({
     required this.id,
@@ -12,6 +12,4 @@ class Exercise {
     required this.muscleGroup,
     this.description,
   });
-
 }
-

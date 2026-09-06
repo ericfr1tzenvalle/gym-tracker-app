@@ -1,6 +1,1 @@
-enum MuscleGroup {
-  chest,
-  back,
-  arms,
-  legs
-}
+enum MuscleGroup { chest, back, arms, legs }
