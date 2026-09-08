@@ -2,8 +2,24 @@ import '../models/exercises.dart';
 import '../models/workouts.dart';
 
 class WorkoutRepository {
-  final List<Workout> _workouts = [];
-  int _nextWorkoutId = 1;
+  final List<Workout> _workouts = [
+    Workout(
+      id: '1',
+      name: 'Push Day',
+      exercises: [],
+    ),
+    Workout(
+      id: '2',
+      name: 'Pull Day',
+      exercises: [],
+    ),
+    Workout(
+      id: '3',
+      name: 'Leg Day',
+      exercises: [],
+    ),
+  ];
+  int _nextWorkoutId = 4;
 
   List<Workout> findAll() => List.unmodifiable(_workouts);
 

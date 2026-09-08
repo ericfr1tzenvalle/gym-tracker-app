@@ -57,13 +57,13 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  assets:
-    - lib/assets/logo.png
-
   fonts:
-    - family: SacredHertz
+    - family: MatchaMint
       fonts:
-        - asset: lib/assets/fonts/SacredHertz.otf
+        - asset: lib/assets/fonts/MatchaMint.ttf
+    - family: Marola
+      fonts:
+        - asset: lib/assets/fonts/Marola.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

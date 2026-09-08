@@ -1,36 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:gym_tracker_app/dev/theme_preview_page.dart';
+import '../widgets/workout_card.dart';
+import '../controllers/workout_controller.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final WorkoutController controller;
+
+  const HomePage({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final workouts = controller.getAllWorkouts();
+    final workout = workouts.isEmpty ? null : workouts.last;
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text('LilGym', style: TextStyle(
-          fontFamily: 'SacredHertz',
-          fontSize: 24,
-        )),
-        backgroundColor: Colors.transparent,
-      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Hi Eric !',
-                          style: textTheme.headlineSmall,
+                        const Text(
+                          'Welcome back!',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'MatchaMint',
+                            color: Colors.white,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -53,76 +57,18 @@ class HomePage extends StatelessWidget {
                   ),
                 ],
               ),
-
-              const SizedBox(height: 16),
-
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    15,
-                    20,
-                    10,
-                    20,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '# 1 - Back Day',
-                              style: textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 18,
-                                fontFamily: 'SacredHertz',
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Back + Biceps + Shoulders',
-                              style: textTheme.bodyMedium,
-                            ),
-                          ],
-                        ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: workout == null
+                    ? const Text('Create a workout in the Workouts tab.')
+                    : WorkoutCard(
+                        title: workout.name,
+                        exercises: workout.exercises
+                            .map((exercise) => exercise.name)
+                            .toList(),
+                        onStart: () {},
                       ),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 14,
-                          ),
-                        ),
-                        child: const Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.play_arrow, size: 26),
-                            SizedBox(height: 1),
-                            Text(
-                              'Start',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              ElevatedButton(
-                onPressed: () {},
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.add),
-                    const SizedBox(width: 2),
-                    Text('Add Workout', style: textTheme.labelLarge),
-                  ],
-                ),
               ),
             ],
           ),

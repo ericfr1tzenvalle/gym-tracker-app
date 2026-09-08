@@ -24,4 +24,4 @@ A identidade visual foi definida em uma abordagem mais underground, com estétic
 - Icon Inactive: #7F8080
 
 > Fluxo visual principal: preto, branco e carmesim.
-> A logo está disponível em: /assets/logo.png
+> A logo é renderizada pelo widget AppLogo em lib/widgets/app_logo.dart, usando a fonte Marola.
