@@ -5,13 +5,13 @@ class ThemePreviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme; // acessa o tema atual do aplicativo
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Theme Preview'),
       ),
-      body: ListView( //  uso de listview para permitir colocar os widgets em uma lista rolável
-        padding: const EdgeInsets.all(16), // esse padding é aplicado em todos os lados do ListView
+      body: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
           Text('Typography', style: textTheme.headlineLarge),
           const SizedBox(height: 16),
@@ -26,7 +26,7 @@ class ThemePreviewPage extends StatelessWidget {
           ElevatedButton(onPressed: () {}, child: const Text('Enabled button')),
           const ElevatedButton(onPressed: null, child: Text('Disabled button')),
 
-          const SizedBox(height: 32), // usei essas sizedbox para criar um espaçamento entre os widgets.
+          const SizedBox(height: 32),
           Text('Inputs', style: textTheme.headlineLarge),
           const SizedBox(height: 16),
           const TextField(
@@ -42,8 +42,7 @@ class ThemePreviewPage extends StatelessWidget {
             decoration: InputDecoration(
               labelText: 'Disabled input',
               icon: Icon(Icons.block),
-              
-              
+
             ),
           ),
           const SizedBox(height: 16),
@@ -66,7 +65,7 @@ class ThemePreviewPage extends StatelessWidget {
                   Text('Push day', style: textTheme.headlineSmall),
                   const SizedBox(height: 8),
                   Text('Workout description', style: textTheme.bodyMedium),
-                  
+
                 ],
               ),
             ),

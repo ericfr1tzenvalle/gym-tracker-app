@@ -40,24 +40,24 @@ abstract final class AppTheme {
         titleMedium: TextStyle(fontSize: 14),
         titleSmall: TextStyle(fontSize: 13),
         headlineSmall: TextStyle(
-          // Títulos principais
+
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w400,
           fontSize: 20,
         ),
         bodyLarge: TextStyle(
-          // Textos principais
+
           color: AppColors.textPrimary,
           fontSize: 14,
         ),
         bodyMedium: TextStyle(
-          // Textos secundarios e descrições
+
           color: AppColors.textSecondary,
           fontSize: 13,
           fontFamily: 'Montserrat',
         ),
         labelLarge: TextStyle(
-          // Texto de botões e labels
+
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),

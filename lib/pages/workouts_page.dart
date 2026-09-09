@@ -74,7 +74,7 @@ class _WorkoutsPageState extends State<WorkoutsPage> {
                     return WorkoutListCard(
                       title: treino.name,
                       onTap: () {
-                        // Handle tap event
+
                       },
                     );
                   },
