@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  // Base escura
+
   static const background = Color(0xFF080808);
   static const surface = Color(0xFF111111);
   static const surfaceElevated = Color(0xFF181818);
   static const border = Color(0xFF292929);
 
-  // Carmesim
   static const crimson = Color(0xFFCA2123);
   static const crimsonDark = Color(0xFF9E171B);
   static const crimsonDeep = Color(0xFF640F12);
   static const crimsonSoft = Color(0xFF913E40);
 
-  // Textos e neutros
   static const textPrimary = Color(0xFFF0F0F0);
   static const textSecondary = Color(0xFF9E9D9D);
   static const textDisabled = Color(0xFF535353);

@@ -1,10 +1,13 @@
-import 'package:gym_tracker_app/models/exercises.dart';
+import 'workout_exercise.dart';
 
 class Workout {
   final String id;
   final String name;
-  final List<Exercise> exercises;
+  final List<WorkoutExercise> exercises;
 
-  Workout({required this.id, required this.name, List<Exercise>? exercises})
-    : exercises = exercises ?? [];
+  Workout({
+    required this.id,
+    required this.name,
+    List<WorkoutExercise>? exercises,
+  }) : exercises = exercises ?? [];
 }
