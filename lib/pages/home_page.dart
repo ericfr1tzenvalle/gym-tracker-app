@@ -20,12 +20,52 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool _openingSession = false;
+
+  Future<void> _openSession(String? workoutId) async {
+    if (_openingSession) return;
+    _openingSession = true;
+    try {
+      final controller = widget.workoutSessionController;
+      final activeSession = controller.getActiveSession();
+      if (activeSession == null && workoutId == null) return;
+      final session =
+          activeSession ?? controller.startOrResumeSession(workoutId!);
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (context) => WorkoutSessionPage(
+            workoutSessionController: controller,
+            sessionId: session.id,
+          ),
+        ),
+      );
+      if (mounted) setState(() {});
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
+          content: Text(
+            'Unable to start the session. Make sure the workout exists and has exercises.',
+          ),
+        ),
+      );
+    } finally {
+      _openingSession = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final workouts = widget.controller.getAllWorkouts();
-    final workout = workouts.isEmpty ? null : workouts.first;
-    final currentWorkoutId = workout?.id;
+    final activeSession = widget.workoutSessionController.getActiveSession();
+    final workout = activeSession != null
+        ? widget.controller.getWorkoutById(activeSession.workoutId)
+        : workouts.isEmpty
+        ? null
+        : workouts.first;
 
     return Scaffold(
       body: SafeArea(
@@ -51,7 +91,9 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Your workout for today is',
+                          activeSession != null
+                              ? 'Continue your active workout'
+                              : 'Your workout for today is',
                           style: textTheme.bodyMedium,
                         ),
                       ],
@@ -73,39 +115,19 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
-                child: workout == null
+                child: workout == null && activeSession == null
                     ? const Text('Create a workout in the Workouts tab.')
                     : WorkoutCard(
-                        title: workout.name,
-                        exercises: workout.exercises
-                            .map((item) => item.exercise.name)
-                            .toList(),
-                        onStart: () {
-                          try {
-                            final session = widget.workoutSessionController
-                                .startOrResumeSession(currentWorkoutId!);
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => WorkoutSessionPage(
-                                  workoutSessionController:
-                                      widget.workoutSessionController,
-                                  sessionId: session.id,
-                                  workoutController: widget.controller,
-                                ),
-                              ),
-                            );
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                behavior: SnackBarBehavior.floating,
-                                backgroundColor: Colors.red,
-                                content: Text(
-                                  'Unable to start the session. Make sure the workout exists and has exercises.',
-                                ),
-                              ),
-                            );
-                          }
-                        },
+                        title: workout?.name ?? 'Workout unavailable',
+                        exercises:
+                            workout?.exercises
+                                .map((item) => item.exercise.name)
+                                .toList() ??
+                            const [],
+                        actionLabel: activeSession != null
+                            ? 'Resume Workout'
+                            : 'Start Workout',
+                        onStart: () => _openSession(workout?.id),
                       ),
               ),
             ],

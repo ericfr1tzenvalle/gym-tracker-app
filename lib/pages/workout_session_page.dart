@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:gym_tracker_app/widgets/workout_set_card.dart';
+
 import '../controllers/workout_session_controller.dart';
 import '../widgets/app_logo.dart';
-import '../controllers/workout_controller.dart';
+import '../widgets/workout_session_actions.dart';
+import '../widgets/workout_session_summary.dart';
+import '../widgets/workout_set_card.dart';
 
 class WorkoutSessionPage extends StatefulWidget {
   final WorkoutSessionController workoutSessionController;
-  final WorkoutController workoutController;
   final String sessionId;
+
   const WorkoutSessionPage({
     super.key,
     required this.workoutSessionController,
     required this.sessionId,
-    required this.workoutController,
   });
 
   @override
@@ -20,121 +21,100 @@ class WorkoutSessionPage extends StatefulWidget {
 }
 
 class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
+  void _showError(String message) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Theme.of(context).colorScheme.error,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+  }
+
+  void _endSession({required bool cancel}) {
+    final controller = widget.workoutSessionController;
+    final updated = cancel
+        ? controller.cancelSession(widget.sessionId)
+        : controller.completeSession(widget.sessionId);
+    if (!updated) _showError('Could not update this session.');
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    final session = widget.workoutSessionController.getSessionById(
+    final progress = widget.workoutSessionController.getSessionProgress(
       widget.sessionId,
     );
-    if (session == null) {
-      return Scaffold(
-        appBar: AppBar(title: const AppLogo()),
-        body: const Center(child: Text('Session not found')),
-      );
-    }
-
-    final workout = widget.workoutController.getWorkoutById(session.workoutId);
-    if (workout == null) {
-      return Scaffold(
-        appBar: AppBar(title: const AppLogo()),
-        body: const Center(child: Text('Workout not found')),
-      );
-    }
-
-    if (workout.exercises.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: const AppLogo()),
-        body: const Center(child: Text('This workout has no exercises.')),
-      );
-    }
-
-    final sessionSets = widget.workoutSessionController.getSetsFromSession(
-      widget.sessionId,
-    );
-    final exerciseIndex = workout.exercises.indexWhere((item) {
-      final registeredSets = sessionSets
-          .where((set) => set.exerciseId == item.exercise.id)
-          .length;
-      return registeredSets < item.plannedSets;
-    });
-
-    if (exerciseIndex == -1) {
-      return Scaffold(
-        appBar: AppBar(title: const AppLogo()),
-        body: const Center(child: Text('Workout done!')),
-      );
-    }
-
-    final workoutExercise = workout.exercises[exerciseIndex];
-    final completedSets = sessionSets
-        .where((set) => set.exerciseId == workoutExercise.exercise.id)
-        .toList();
+    final exercise = progress?.currentExercise;
 
     return Scaffold(
       appBar: AppBar(
         title: const AppLogo(),
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            tooltip: 'Workout options',
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: 'finish',
-                enabled: false,
-                child: Text('Finish workout early'),
-              ),
-              PopupMenuItem(
-                value: 'cancel',
-                enabled: false,
-                child: Text('Cancel workout'),
-              ),
-            ],
-          ),
+          if (progress != null && progress.session.isActive)
+            WorkoutSessionActions(
+              canFinish: progress.totalCompletedSets > 0,
+              onFinish: () => _endSession(cancel: false),
+              onCancel: () => _endSession(cancel: true),
+            ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text('Workout in progress'),
-          WorkoutSetCard(
-            key: ValueKey(workoutExercise.exercise.id),
-            exerciseName: workoutExercise.exercise.name,
-            setNumber: completedSets.length + 1,
-            weight: 0.0,
-            repetitions: workoutExercise.plannedRepetitions,
-            numberOfExercises: workout.exercises.length,
-            exerciseIndex: exerciseIndex,
-            plannedSets: workoutExercise.plannedSets,
-            plannedRepetitions: workoutExercise.plannedRepetitions,
-            onRegister: (weight, repetitions) {
-              final registeredSet = widget.workoutSessionController
-                  .addSetToSession(
-                    sessionId: widget.sessionId,
-                    exerciseId: workoutExercise.exercise.id,
-                    weight: weight,
-                    repetitions: repetitions,
-                  );
-              if (registeredSet == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to register set.')),
-                );
-                return;
-              }
-              final isLastExercise =
-                  exerciseIndex == workout.exercises.length - 1;
-              final isLastSet =
-                  completedSets.length + 1 >= workoutExercise.plannedSets;
-
-              if (isLastExercise && isLastSet) {
-                widget.workoutSessionController.completeSession(
-                  widget.sessionId,
-                );
-              }
-
-              setState(() {});
-            },
-          ),
-        ],
-      ),
+      body: progress == null
+          ? const Center(child: Text('Session not found'))
+          : !progress.session.isActive
+          ? WorkoutSessionSummary(
+              progress: progress,
+              onDone: () => Navigator.of(context).maybePop(),
+            )
+          : exercise == null
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  'No exercises available. Use the workout options to end this session.',
+                ),
+              ),
+            )
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Text(progress.workout!.name),
+                const Text('Workout in progress'),
+                const SizedBox(height: 16),
+                WorkoutSetCard(
+                  key: ValueKey(exercise.exercise.id),
+                  exerciseName: exercise.exercise.name,
+                  setNumber: progress.currentExerciseCompletedSets + 1,
+                  weight: progress.suggestedSet?.weight ?? 0,
+                  repetitions:
+                      progress.suggestedSet?.repetitions ??
+                      exercise.plannedRepetitions,
+                  numberOfExercises: progress.workout!.exercises.length,
+                  exerciseIndex: progress.exerciseIndex,
+                  plannedSets: exercise.plannedSets,
+                  plannedRepetitions: exercise.plannedRepetitions,
+                  onRegister: (weight, repetitions) {
+                    final registered = widget.workoutSessionController
+                        .addSetToSession(
+                          sessionId: widget.sessionId,
+                          exerciseId: exercise.exercise.id,
+                          weight: weight,
+                          repetitions: repetitions,
+                        );
+                    if (registered == null) {
+                      _showError('Failed to register set.');
+                    }
+                    setState(() {});
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text('You can return home and resume this session.'),
+              ],
+            ),
     );
   }
 }

@@ -17,7 +17,7 @@ abstract final class AppTheme {
         indicatorColor: Colors.transparent,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           return TextStyle(
-            fontFamily: 'MatchaMint',
+            fontFamily: 'Montserrat',
             fontSize: 9,
             color: states.contains(WidgetState.selected)
                 ? AppColors.textPrimary

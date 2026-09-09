@@ -4,12 +4,14 @@ class WorkoutCard extends StatelessWidget {
   final String title;
   final List<String> exercises;
   final VoidCallback onStart;
+  final String actionLabel;
 
   const WorkoutCard({
     super.key,
     required this.title,
     required this.exercises,
     required this.onStart,
+    this.actionLabel = 'Start Workout',
   });
 
   @override
@@ -78,7 +80,7 @@ class WorkoutCard extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: onStart,
-                      child: const Text('Start Workout'),
+                      child: Text(actionLabel),
                     ),
                   ),
                 ],

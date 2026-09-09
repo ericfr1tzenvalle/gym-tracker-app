@@ -30,7 +30,14 @@ class SessionRepository {
 
   WorkoutSession startOrResumeSession(String workoutId) {
     final activeSession = findActiveSession();
-    if (activeSession != null) return activeSession;
+    if (activeSession != null) {
+      if (activeSession.workoutId != workoutId) {
+        throw StateError(
+          'Another workout is already in progress. Resume or end it first.',
+        );
+      }
+      return activeSession;
+    }
 
     final session = WorkoutSession(
       id: _nextSessionId.toString(),
@@ -48,7 +55,9 @@ class SessionRepository {
 
   bool completeSession(String sessionId) {
     final session = findById(sessionId);
-    if (session == null || !session.isActive) return false;
+    if (session == null || !session.isActive || session.sets.isEmpty) {
+      return false;
+    }
     session.completedAt = DateTime.now();
     session.status = WorkoutSessionStatus.completed;
     return true;
