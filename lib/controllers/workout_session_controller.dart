@@ -2,13 +2,19 @@ import 'package:gym_tracker_app/repositories/session_repository.dart';
 
 import '../models/workout_session.dart';
 import '../models/workout_set.dart';
+import '../repositories/workout_repository.dart';
 
 class WorkoutSessionController {
   final SessionRepository _sessionRepository;
+  final WorkoutRepository _workoutRepository;
 
-  WorkoutSessionController(this._sessionRepository);
+  WorkoutSessionController(this._sessionRepository, this._workoutRepository);
 
   WorkoutSession startOrResumeSession(String workoutId) {
+    final workout = _workoutRepository.findById(workoutId);
+    if (workout == null || workout.exercises.isEmpty) {
+      throw Exception('Workout not found or has no exercises.');
+    }
     return _sessionRepository.startOrResumeSession(workoutId);
   }
 

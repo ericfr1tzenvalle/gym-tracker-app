@@ -6,6 +6,8 @@ import 'package:gym_tracker_app/pages/workouts_page.dart';
 import 'widgets/app_logo.dart';
 import 'controllers/workout_controller.dart';
 import 'repositories/workout_repository.dart';
+import 'repositories/session_repository.dart';
+import 'controllers/workout_session_controller.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -15,10 +17,20 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  final _workoutController = WorkoutController(WorkoutRepository());
+  final _workoutRepository = WorkoutRepository();
+  final _sessionRepository = SessionRepository();
+  late final _workoutController = WorkoutController(_workoutRepository);
+
+  late final _workoutSessionController = WorkoutSessionController(
+    _sessionRepository,
+    _workoutRepository,
+  );
 
   List<Widget> get _pages => [
-    HomePage(controller: _workoutController),
+    HomePage(
+      controller: _workoutController,
+      workoutSessionController: _workoutSessionController,
+    ),
     WorkoutsPage(controller: _workoutController),
     const EvolutionPage(),
     const ProfilePage(),

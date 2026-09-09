@@ -2,17 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:gym_tracker_app/dev/theme_preview_page.dart';
 import '../widgets/workout_card.dart';
 import '../controllers/workout_controller.dart';
+import '../controllers/workout_session_controller.dart';
+import 'workout_session_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final WorkoutController controller;
+  final WorkoutSessionController workoutSessionController;
 
-  const HomePage({super.key, required this.controller});
+  const HomePage({
+    super.key,
+    required this.controller,
+    required this.workoutSessionController,
+  });
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final workouts = controller.getAllWorkouts();
-    final workout = workouts.isEmpty ? null : workouts.last;
+    final workouts = widget.controller.getAllWorkouts();
+    final workout = workouts.isEmpty ? null : workouts.first;
+    final currentWorkoutId = workout?.id;
 
     return Scaffold(
       body: SafeArea(
@@ -65,9 +78,34 @@ class HomePage extends StatelessWidget {
                     : WorkoutCard(
                         title: workout.name,
                         exercises: workout.exercises
-                            .map((exercise) => exercise.name)
+                            .map((item) => item.exercise.name)
                             .toList(),
-                        onStart: () {},
+                        onStart: () {
+                          try {
+                            final session = widget.workoutSessionController
+                                .startOrResumeSession(currentWorkoutId!);
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => WorkoutSessionPage(
+                                  workoutSessionController:
+                                      widget.workoutSessionController,
+                                  sessionId: session.id,
+                                  workoutController: widget.controller,
+                                ),
+                              ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Colors.red,
+                                content: Text(
+                                  'Unable to start the session. Make sure the workout exists and has exercises.',
+                                ),
+                              ),
+                            );
+                          }
+                        },
                       ),
               ),
             ],

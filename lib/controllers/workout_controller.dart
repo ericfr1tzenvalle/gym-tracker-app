@@ -35,10 +35,18 @@ class WorkoutController {
     return _workoutRepository.findById(id);
   }
 
-  bool addExerciseToWorkout(String workoutId, Exercise exercise) {
+  bool addExerciseToWorkout(
+    String workoutId,
+    Exercise exercise, {
+    required int plannedSets,
+    required int plannedRepetitions,
+  }) {
+    if (plannedRepetitions < 1 || plannedSets < 1) return false;
     return _workoutRepository.addExerciseToWorkout(
       workoutId: workoutId,
       exercise: exercise,
+      plannedSets: plannedSets,
+      plannedRepetitions: plannedRepetitions,
     );
   }
 
