@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 
 class WorkoutListCard extends StatelessWidget {
   final String title;
+  final int exerciseCount;
   final VoidCallback onTap;
-  const WorkoutListCard({super.key, required this.title, required this.onTap});
+  const WorkoutListCard({
+    super.key,
+    required this.title,
+    required this.exerciseCount,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +23,15 @@ class WorkoutListCard extends StatelessWidget {
           style: TextStyle(fontFamily: 'MatchaMint', fontSize: 13),
         ),
         onTap: onTap,
-        trailing: Icon(Icons.chevron_right),
+        trailing: const Icon(Icons.chevron_right),
+        subtitle: Text(
+          exerciseCount == 1 ? '1 exercise' : '$exerciseCount exercises',
+          style: const TextStyle(
+            fontFamily: 'Montserrat',
+            fontSize: 10,
+            color: Colors.grey,
+          ),
+        ),
       ),
     );
   }

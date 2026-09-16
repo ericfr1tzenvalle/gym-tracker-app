@@ -73,6 +73,7 @@ class _WorkoutsPageState extends State<WorkoutsPage> {
 
                     return WorkoutListCard(
                       title: treino.name,
+                      exerciseCount: treino.exercises.length,
                       onTap: () {
 
                       },
