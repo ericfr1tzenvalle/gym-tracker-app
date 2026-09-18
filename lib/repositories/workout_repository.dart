@@ -91,6 +91,16 @@ class WorkoutRepository {
     return true;
   }
 
+  bool updateName(String workoutId, String name) {
+    final workout = findById(workoutId);
+    if (workout == null) {
+      return false;
+    }
+
+    workout.name = name;
+    return true;
+  }
+
   bool addExerciseToWorkout({
     required String workoutId,
     required Exercise exercise,

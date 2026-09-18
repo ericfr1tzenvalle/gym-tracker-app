@@ -2,17 +2,32 @@ import 'package:flutter/material.dart';
 
 class CreateWorkoutDialog extends StatefulWidget {
   final String? Function(String name) onCreate;
+  final String actionLabel;
+  final String initialName;
+  final String title;
 
-  const CreateWorkoutDialog({super.key, required this.onCreate});
+  const CreateWorkoutDialog({
+    super.key,
+    required this.onCreate,
+    this.actionLabel = 'Create',
+    this.initialName = '',
+    this.title = 'Create Workout',
+  });
 
   @override
   State<CreateWorkoutDialog> createState() => _CreateWorkoutDialogState();
 }
 
 class _CreateWorkoutDialogState extends State<CreateWorkoutDialog> {
-  final _nameController = TextEditingController();
+  late final TextEditingController _nameController;
   String? _errorText;
   bool _submitted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName);
+  }
 
   void _create() {
     if (_submitted) return;
@@ -37,7 +52,7 @@ class _CreateWorkoutDialogState extends State<CreateWorkoutDialog> {
     return AlertDialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       title: Text(
-        'Create Workout',
+        widget.title,
         style: TextStyle(fontFamily: 'MatchaMint', fontSize: 16),
       ),
       content: TextFormField(
@@ -55,7 +70,7 @@ class _CreateWorkoutDialogState extends State<CreateWorkoutDialog> {
           },
           child: const Text('Cancel'),
         ),
-        TextButton(onPressed: _create, child: const Text('Create')),
+        TextButton(onPressed: _create, child: Text(widget.actionLabel)),
       ],
     );
   }

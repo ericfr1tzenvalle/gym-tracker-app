@@ -8,11 +8,12 @@ class WorkoutController {
 
   WorkoutController(this._workoutRepository);
 
-  String? validateWorkoutName(String name) {
+  String? validateWorkoutName(String name, {String? ignoredWorkoutId}) {
     final normalizedName = name.trim();
     if (normalizedName.isEmpty) return 'Enter a workout name.';
     final alreadyExists = _workoutRepository.findAll().any(
       (workout) =>
+          workout.id != ignoredWorkoutId &&
           workout.name.trim().toLowerCase() == normalizedName.toLowerCase(),
     );
     if (alreadyExists) return 'A workout with this name already exists.';
@@ -25,6 +26,15 @@ class WorkoutController {
       return false;
     }
     return _workoutRepository.add(normalizedName);
+  }
+
+  bool updateWorkoutName(String workoutId, String name) {
+    final normalizedName = name.trim();
+    if (validateWorkoutName(normalizedName, ignoredWorkoutId: workoutId) !=
+        null) {
+      return false;
+    }
+    return _workoutRepository.updateName(workoutId, normalizedName);
   }
 
   bool deleteWorkout(String workoutId) {

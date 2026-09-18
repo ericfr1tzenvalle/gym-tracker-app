@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gym_tracker_app/widgets/create_workout_dialog.dart';
-import 'package:gym_tracker_app/widgets/workout_card_empty.dart';
 import '../widgets/workout_list_card.dart';
 import '../controllers/workout_controller.dart';
+import 'workout_details.dart';
 
 class WorkoutsPage extends StatefulWidget {
   final WorkoutController controller;
@@ -50,32 +50,65 @@ class _WorkoutsPageState extends State<WorkoutsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Your workouts',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'MatchaMint',
-                  color: Colors.white,
-                ),
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Your workouts',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'MatchaMint',
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: _createWorkout,
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFFCA2123),
+                      minimumSize: const Size(0, 40),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      textStyle: const TextStyle(
+                        fontFamily: 'MatchaMint',
+                        fontSize: 12,
+                      ),
+                      side: const BorderSide(color: Color(0xFFCA2123)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('New'),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               Expanded(
                 child: ListView.separated(
-                  padding: EdgeInsets.zero,
-                  itemCount: workouts.length + 1,
+                  padding: const EdgeInsets.only(bottom: 112),
+                  itemCount: workouts.length,
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 12),
                   itemBuilder: (context, index) {
-                    if (index == workouts.length) {
-                      return WorkoutCardEmpty(onTap: _createWorkout);
-                    }
                     final treino = workouts[index];
 
                     return WorkoutListCard(
                       title: treino.name,
                       exerciseCount: treino.exercises.length,
-                      onTap: () {
-
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return WorkoutDetails(
+                                workout: treino,
+                                controller: widget.controller,
+                              );
+                            },
+                          ),
+                        );
+                        if (!context.mounted) return;
+                        setState(() {});
                       },
                     );
                   },
