@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/glass_surface.dart';
 
 class ThemePreviewPage extends StatelessWidget {
   const ThemePreviewPage({super.key});
@@ -7,9 +8,7 @@ class ThemePreviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Theme Preview'),
-      ),
+      appBar: GlassAppBar(title: const Text('Theme Preview')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -42,7 +41,6 @@ class ThemePreviewPage extends StatelessWidget {
             decoration: InputDecoration(
               labelText: 'Disabled input',
               icon: Icon(Icons.block),
-
             ),
           ),
           const SizedBox(height: 16),
@@ -55,23 +53,21 @@ class ThemePreviewPage extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           Text('Cards', style: textTheme.headlineLarge),
-          Card(
-            color: Theme.of(context).cardColor,
-            surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
-            child: Padding(padding: EdgeInsetsGeometry.all(12),
+          GlassSurface(
+            child: Padding(
+              padding: EdgeInsetsGeometry.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Push day', style: textTheme.headlineSmall),
                   const SizedBox(height: 8),
                   Text('Workout description', style: textTheme.bodyMedium),
-
                 ],
               ),
             ),
-          )
+          ),
         ],
-      )
+      ),
     );
   }
 }

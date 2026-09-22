@@ -4,6 +4,7 @@ import 'package:gym_tracker_app/pages/home_page.dart';
 import 'package:gym_tracker_app/pages/profile_page.dart';
 import 'package:gym_tracker_app/pages/workouts_page.dart';
 import 'widgets/app_logo.dart';
+import 'widgets/glass_surface.dart';
 import 'controllers/workout_controller.dart';
 import 'repositories/workout_repository.dart';
 import 'repositories/session_repository.dart';
@@ -43,19 +44,15 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      appBar: AppBar(
-        centerTitle: true,
-        title: const AppLogo(),
-        backgroundColor: Colors.transparent,
-      ),
+      appBar: GlassAppBar(centerTitle: true, title: const AppLogo()),
       body: _pages[_selectedIndex],
 
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(32, 0, 32, 18),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(30),
+          child: GlassSurface(
+            radius: 30,
             child: NavigationBar(
               onDestinationSelected: (index) {
                 setState(() {

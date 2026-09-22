@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'glass_surface.dart';
 
 class WorkoutCard extends StatelessWidget {
   final String title;
@@ -28,9 +29,7 @@ class WorkoutCard extends StatelessWidget {
       subtitle = '$preview + $remaining $word';
     }
 
-    return Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
+    return GlassSurface(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 4, 4, 16),
         child: Column(

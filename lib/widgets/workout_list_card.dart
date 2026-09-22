@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'glass_surface.dart';
 
 class WorkoutListCard extends StatelessWidget {
   final String title;
@@ -13,9 +14,7 @@ class WorkoutListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
+    return GlassSurface(
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         title: Text(

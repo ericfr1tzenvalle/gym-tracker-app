@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/glass_surface.dart';
 import 'package:gym_tracker_app/widgets/workout_set_card.dart';
 import '../controllers/workout_session_controller.dart';
 import '../widgets/app_logo.dart';
@@ -27,7 +28,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
     );
     if (session == null) {
       return Scaffold(
-        appBar: AppBar(title: const AppLogo()),
+        appBar: GlassAppBar(title: const AppLogo()),
         body: const Center(child: Text('Session not found')),
       );
     }
@@ -35,14 +36,14 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
     final workout = widget.workoutController.getWorkoutById(session.workoutId);
     if (workout == null) {
       return Scaffold(
-        appBar: AppBar(title: const AppLogo()),
+        appBar: GlassAppBar(title: const AppLogo()),
         body: const Center(child: Text('Workout not found')),
       );
     }
 
     if (workout.exercises.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const AppLogo()),
+        appBar: GlassAppBar(title: const AppLogo()),
         body: const Center(child: Text('This workout has no exercises.')),
       );
     }
@@ -59,7 +60,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
 
     if (exerciseIndex == -1) {
       return Scaffold(
-        appBar: AppBar(title: const AppLogo()),
+        appBar: GlassAppBar(title: const AppLogo()),
         body: const Center(child: Text('Workout done!')),
       );
     }
@@ -70,7 +71,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: const AppLogo(),
         actions: [
           PopupMenuButton<String>(

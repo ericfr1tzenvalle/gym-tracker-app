@@ -5,7 +5,7 @@ abstract final class AppTheme {
   static ThemeData get dark {
     return ThemeData(
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: Colors.transparent,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.crimson,
         surface: AppColors.surface,
@@ -13,7 +13,9 @@ abstract final class AppTheme {
         onSurface: AppColors.textPrimary,
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         indicatorColor: Colors.transparent,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           return TextStyle(
@@ -32,6 +34,10 @@ abstract final class AppTheme {
           );
         }),
       ),
+      popupMenuTheme: const PopupMenuThemeData(
+        color: Color(0xF01B1B20),
+        surfaceTintColor: Colors.transparent,
+      ),
       dividerColor: AppColors.border,
       textTheme: const TextTheme(
         headlineLarge: TextStyle(fontSize: 28),
@@ -40,27 +46,17 @@ abstract final class AppTheme {
         titleMedium: TextStyle(fontSize: 14),
         titleSmall: TextStyle(fontSize: 13),
         headlineSmall: TextStyle(
-
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w400,
           fontSize: 20,
         ),
-        bodyLarge: TextStyle(
-
-          color: AppColors.textPrimary,
-          fontSize: 14,
-        ),
+        bodyLarge: TextStyle(color: AppColors.textPrimary, fontSize: 14),
         bodyMedium: TextStyle(
-
           color: AppColors.textSecondary,
           fontSize: 13,
           fontFamily: 'Montserrat',
         ),
-        labelLarge: TextStyle(
-
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+        labelLarge: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -77,7 +73,8 @@ abstract final class AppTheme {
         ),
       ),
       cardTheme: const CardThemeData(
-        color: AppColors.surfaceElevated,
+        color: Color(0x0DFFFFFF),
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -85,7 +82,7 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: const InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: Color(0x08FFFFFF),
         hintStyle: TextStyle(color: AppColors.textSecondary),
         labelStyle: TextStyle(color: AppColors.textSecondary),
         floatingLabelStyle: TextStyle(color: AppColors.crimson),
