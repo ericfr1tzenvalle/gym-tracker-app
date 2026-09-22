@@ -122,4 +122,10 @@ class SessionRepository {
     sessions.sort((a, b) => b.startedAt.compareTo(a.startedAt));
     return sessions;
   }
+
+  bool hasActiveSessionForWorkout(String workoutId) {
+  final activeSession = findActiveSession();
+
+  return activeSession?.workoutId == workoutId;
+  } 
 }

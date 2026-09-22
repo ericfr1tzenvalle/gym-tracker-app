@@ -84,4 +84,10 @@ class WorkoutSessionController {
   bool deleteSession(String sessionId) {
     return _sessionRepository.removeSession(sessionId);
   }
+
+  bool canModifyWorkout(String workoutId) {
+  final activeSession = _sessionRepository.findActiveSession();
+
+  return activeSession == null || activeSession.workoutId != workoutId;
+  }
 }

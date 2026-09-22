@@ -19,7 +19,10 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   final _workoutRepository = WorkoutRepository();
   final _sessionRepository = SessionRepository();
-  late final _workoutController = WorkoutController(_workoutRepository);
+  late final _workoutController = WorkoutController(
+    _workoutRepository,
+    _sessionRepository,
+  );
 
   late final _workoutSessionController = WorkoutSessionController(
     _sessionRepository,
