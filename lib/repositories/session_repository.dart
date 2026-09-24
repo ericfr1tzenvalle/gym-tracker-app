@@ -1,5 +1,6 @@
 import 'package:gym_tracker_app/models/workout_session_status.dart';
 import 'package:gym_tracker_app/models/workout_set.dart';
+
 import '../models/workout_session.dart';
 
 class SessionRepository {
@@ -30,8 +31,15 @@ class SessionRepository {
 
   WorkoutSession startOrResumeSession(String workoutId) {
     final activeSession = findActiveSession();
-    if (activeSession != null) return activeSession;
-    
+    if (activeSession != null) {
+      if (activeSession.workoutId != workoutId) {
+        throw StateError(
+          'Another workout is already in progress. Resume or end it first.',
+        );
+      }
+      return activeSession;
+    }
+
     final session = WorkoutSession(
       id: _nextSessionId.toString(),
       startedAt: DateTime.now(),
@@ -47,31 +55,36 @@ class SessionRepository {
   }
 
   WorkoutSession? getLastCompletedSessionForWorkout(String workoutId) {
-    final sessions = _sessions.where(
-      (session) =>
-          session.workoutId == workoutId &&
-          session.status == WorkoutSessionStatus.completed,
-    ).toList();
+    final sessions = _sessions
+        .where(
+          (session) =>
+              session.workoutId == workoutId &&
+              session.status == WorkoutSessionStatus.completed,
+        )
+        .toList();
 
     if (sessions.isEmpty) return null;
 
-    sessions.sort((a,b) => b.startedAt.compareTo(a.startedAt));
+    sessions.sort((a, b) => b.startedAt.compareTo(a.startedAt));
     return sessions.first;
   }
+
   WorkoutSession? getLastCompletedSession() {
-    final sessions = _sessions.where(
-      (session) =>
-          session.status == WorkoutSessionStatus.completed,
-    ).toList();
+    final sessions = _sessions
+        .where((session) => session.status == WorkoutSessionStatus.completed)
+        .toList();
 
     if (sessions.isEmpty) return null;
 
-    sessions.sort((a,b) => b.startedAt.compareTo(a.startedAt));
+    sessions.sort((a, b) => b.startedAt.compareTo(a.startedAt));
     return sessions.first;
   }
+
   bool completeSession(String sessionId) {
     final session = findById(sessionId);
-    if (session == null || !session.isActive) return false;
+    if (session == null || !session.isActive || session.sets.isEmpty) {
+      return false;
+    }
     session.completedAt = DateTime.now();
     session.status = WorkoutSessionStatus.completed;
     return true;
@@ -147,8 +160,8 @@ class SessionRepository {
   }
 
   bool hasActiveSessionForWorkout(String workoutId) {
-  final activeSession = findActiveSession();
+    final activeSession = findActiveSession();
 
-  return activeSession?.workoutId == workoutId;
-  } 
+    return activeSession?.workoutId == workoutId;
+  }
 }

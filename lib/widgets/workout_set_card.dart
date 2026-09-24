@@ -31,17 +31,29 @@ class WorkoutSetCard extends StatefulWidget {
 }
 
 class _WorkoutSetCardState extends State<WorkoutSetCard> {
-  late double _weight;
-  late int _repetitions;
   late final TextEditingController _weightController;
   late final TextEditingController _repsController;
+
+  double? get _weight =>
+      double.tryParse(_weightController.text.replaceAll(',', '.'));
+
+  int? get _repetitions => int.tryParse(_repsController.text);
+
+  bool get _hasValidWeight {
+    final weight = _weight;
+    return weight != null && weight.isFinite && weight > 0;
+  }
+
+  bool get _hasValidRepetitions {
+    final repetitions = _repetitions;
+    return repetitions != null && repetitions > 0;
+  }
+
   @override
   void initState() {
     super.initState();
-    _weight = widget.weight;
-    _repetitions = widget.repetitions;
-    _weightController = TextEditingController(text: '$_weight');
-    _repsController = TextEditingController(text: '$_repetitions');
+    _weightController = TextEditingController(text: '${widget.weight}');
+    _repsController = TextEditingController(text: '${widget.repetitions}');
   }
 
   @override
@@ -51,9 +63,45 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
     super.dispose();
   }
 
+  void _updateValue(TextEditingController controller, String text) {
+    setState(() {
+      controller.value = TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+    });
+  }
+
+  void _registerSet() {
+    if (!_hasValidWeight || !_hasValidRepetitions) {
+      final messages = [
+        if (!_hasValidWeight) 'Enter a weight greater than 0.',
+        if (!_hasValidRepetitions) 'Enter repetitions greater than 0.',
+      ];
+      FocusManager.instance.primaryFocus?.unfocus();
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(messages.join('\n')),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    widget.onRegister(_weight!, _repetitions!);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final weight = _weight;
+    final adjustableWeight = weight != null && weight.isFinite ? weight : 0.0;
+    final repetitions = _repetitions ?? 0;
     final valueStyle = theme.textTheme.headlineMedium?.copyWith(
       fontWeight: FontWeight.w700,
       fontSize: 40,
@@ -123,28 +171,17 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
                           controller: _weightController,
                           valueStyle: valueStyle,
                           decimal: true,
-                          onChanged: (text) {
-                            final value = double.tryParse(
-                              text.replaceAll(',', '.'),
-                            );
-                            if (value == null || !value.isFinite || value < 0) {
-                              return;
-                            }
-                            setState(() => _weight = value);
-                          },
-                          onDecrease: _weight >= 2.5
-                              ? () => setState(() {
-                                  _weight =
-                                      ((_weight - 2.5) * 100).round() / 100;
-                                  _weightController.text = '$_weight';
-                                })
+                          onDecrease: adjustableWeight >= 2.5
+                              ? () => _updateValue(
+                                  _weightController,
+                                  '${((adjustableWeight - 2.5) * 100).round() / 100}',
+                                )
                               : null,
-                          onIncrease: _weight + 2.5 <= 999.99
-                              ? () => setState(() {
-                                  _weight =
-                                      ((_weight + 2.5) * 100).round() / 100;
-                                  _weightController.text = '$_weight';
-                                })
+                          onIncrease: adjustableWeight + 2.5 <= 999.99
+                              ? () => _updateValue(
+                                  _weightController,
+                                  '${((adjustableWeight + 2.5) * 100).round() / 100}',
+                                )
                               : null,
                         ),
                       ),
@@ -155,22 +192,17 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
                           controller: _repsController,
                           valueStyle: valueStyle,
                           decimal: false,
-                          onChanged: (text) {
-                            final value = int.tryParse(text);
-                            if (value == null || value < 0) return;
-                            setState(() => _repetitions = value);
-                          },
-                          onDecrease: _repetitions >= 1
-                              ? () => setState(() {
-                                  _repetitions--;
-                                  _repsController.text = '$_repetitions';
-                                })
+                          onDecrease: repetitions >= 1
+                              ? () => _updateValue(
+                                  _repsController,
+                                  '${repetitions - 1}',
+                                )
                               : null,
-                          onIncrease: _repetitions < 99
-                              ? () => setState(() {
-                                  _repetitions++;
-                                  _repsController.text = '$_repetitions';
-                                })
+                          onIncrease: repetitions < 99
+                              ? () => _updateValue(
+                                  _repsController,
+                                  '${repetitions + 1}',
+                                )
                               : null,
                         ),
                       ),
@@ -185,9 +217,7 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: () {
-              widget.onRegister(_weight, _repetitions);
-            },
+            onPressed: _registerSet,
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(60),
               textStyle: theme.textTheme.titleMedium,
@@ -219,7 +249,6 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
     required TextEditingController controller,
     required TextStyle? valueStyle,
     required bool decimal,
-    required ValueChanged<String> onChanged,
     required VoidCallback? onDecrease,
     required VoidCallback? onIncrease,
   }) {
@@ -242,17 +271,6 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
         const SizedBox(height: 2),
         TextField(
           controller: controller,
-          onTapAlwaysCalled: true,
-          onTap: () {
-            controller.clear();
-            setState(() {
-              if (decimal) {
-                _weight = 0;
-              } else {
-                _repetitions = 0;
-              }
-            });
-          },
           inputFormatters: [
             TextInputFormatter.withFunction((oldValue, newValue) {
               final pattern = decimal
@@ -273,7 +291,7 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
             focusedBorder: InputBorder.none,
             semanticCounterText: label,
           ),
-          onChanged: onChanged,
+          onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 4),
         Row(

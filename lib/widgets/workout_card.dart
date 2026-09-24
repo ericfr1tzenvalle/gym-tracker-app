@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+
 import 'glass_surface.dart';
 
 class WorkoutCard extends StatelessWidget {
   final String title;
   final List<String> exercises;
   final VoidCallback onStart;
-  final bool isActive;
+  final String actionLabel;
 
   const WorkoutCard({
     super.key,
     required this.title,
     required this.exercises,
     required this.onStart,
-    this.isActive = false,
+    this.actionLabel = 'Start Workout',
   });
 
   @override
@@ -79,9 +80,7 @@ class WorkoutCard extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: onStart,
-                      child: isActive
-                          ? const Text('Resume Workout')
-                          : const Text('Start Workout'),
+                      child: Text(actionLabel),
                     ),
                   ),
                 ],
