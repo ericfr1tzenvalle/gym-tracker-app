@@ -24,8 +24,11 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final workouts = widget.controller.getAllWorkouts();
-    final workout = workouts.isEmpty ? null : workouts.first;
+    final nextWorkout = widget.controller.getNextWorkout();
+    final workout = nextWorkout == null ? null : workouts[nextWorkout];
     final currentWorkoutId = workout?.id;
+    final activeSession = widget.workoutSessionController.getActiveSession();
+    final isActive = activeSession != null && activeSession.workoutId == currentWorkoutId;
 
     return Scaffold(
       body: SafeArea(
@@ -80,11 +83,15 @@ class _HomePageState extends State<HomePage> {
                         exercises: workout.exercises
                             .map((item) => item.exercise.name)
                             .toList(),
-                        onStart: () {
+                        isActive: isActive,
+                        onStart: () async  {
                           try {
                             final session = widget.workoutSessionController
                                 .startOrResumeSession(currentWorkoutId!);
-                            Navigator.of(context).push(
+
+                            setState(() {});
+
+                           await Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) => WorkoutSessionPage(
                                   workoutSessionController:
@@ -95,6 +102,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             );
                           } catch (e) {
+                            if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 behavior: SnackBarBehavior.floating,
@@ -104,7 +112,11 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             );
+
+                           
                           }
+                          if(!mounted) return;
+                          setState(() {});
                         },
                       ),
               ),

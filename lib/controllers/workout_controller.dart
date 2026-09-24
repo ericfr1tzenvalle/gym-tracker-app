@@ -65,6 +65,25 @@ class WorkoutController {
     );
   }
 
+  int? getNextWorkout() {
+    final workouts = _workoutRepository.findAll();
+    if (workouts.isEmpty) return null;
+
+    final activeSession = _sessionRepository.findActiveSession();
+    if (activeSession != null) {
+      final activeIndex = workouts.indexWhere(
+        (workout) => workout.id == activeSession.workoutId,
+      );
+      if (activeIndex != -1) return activeIndex;
+    }
+
+    final lastSession = _sessionRepository.getLastCompletedSession();
+    if (lastSession == null) return 0;
+
+    return _workoutRepository.getNextWorkout(lastSession.workoutId);
+  }
+
+
   bool removeExerciseFromWorkout(String workoutId, String exerciseId) {
     if (!canModifyWorkout(workoutId)) {
       return false; // Cannot remove exercise if there's an active session for the workout

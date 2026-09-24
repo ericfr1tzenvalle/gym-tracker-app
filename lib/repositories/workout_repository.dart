@@ -62,6 +62,14 @@ class WorkoutRepository {
     return null;
   }
 
+  int? getNextWorkout(String lastWorkoutId) {
+    if (_workouts.isEmpty) return null;
+
+    final nextWorkout =
+        _workouts.indexWhere((workout) => workout.id == lastWorkoutId) + 1;
+    return nextWorkout % _workouts.length;
+  }
+
   bool _containsExercise(Workout workout, String exerciseId) {
     return workout.exercises.any((item) => item.exercise.id == exerciseId);
   }
