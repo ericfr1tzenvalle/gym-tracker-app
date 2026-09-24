@@ -31,7 +31,7 @@ class SessionRepository {
   WorkoutSession startOrResumeSession(String workoutId) {
     final activeSession = findActiveSession();
     if (activeSession != null) return activeSession;
-
+    
     final session = WorkoutSession(
       id: _nextSessionId.toString(),
       startedAt: DateTime.now(),
@@ -46,6 +46,29 @@ class SessionRepository {
     return session;
   }
 
+  WorkoutSession? getLastCompletedSessionForWorkout(String workoutId) {
+    final sessions = _sessions.where(
+      (session) =>
+          session.workoutId == workoutId &&
+          session.status == WorkoutSessionStatus.completed,
+    ).toList();
+
+    if (sessions.isEmpty) return null;
+
+    sessions.sort((a,b) => b.startedAt.compareTo(a.startedAt));
+    return sessions.first;
+  }
+  WorkoutSession? getLastCompletedSession() {
+    final sessions = _sessions.where(
+      (session) =>
+          session.status == WorkoutSessionStatus.completed,
+    ).toList();
+
+    if (sessions.isEmpty) return null;
+
+    sessions.sort((a,b) => b.startedAt.compareTo(a.startedAt));
+    return sessions.first;
+  }
   bool completeSession(String sessionId) {
     final session = findById(sessionId);
     if (session == null || !session.isActive) return false;

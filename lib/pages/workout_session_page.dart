@@ -69,7 +69,10 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
     final completedSets = sessionSets
         .where((set) => set.exerciseId == workoutExercise.exercise.id)
         .toList();
-
+    final previousSession = widget.workoutSessionController.getLastCompletedSessionForWorkout(session.workoutId);
+    final previousSets = previousSession?.sets.where((set) => set.exerciseId == workoutExercise.exercise.id).toList();
+    final setIndex = completedSets.length;
+    final previousSet = previousSets != null && setIndex < previousSets.length? previousSets[setIndex]: null;
     return Scaffold(
       appBar: GlassAppBar(
         title: const AppLogo(),
@@ -97,11 +100,11 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
         children: [
           Text('Workout in progress'),
           WorkoutSetCard(
-            key: ValueKey(workoutExercise.exercise.id),
+            key: ValueKey('${workoutExercise.exercise.id}:$setIndex'),
             exerciseName: workoutExercise.exercise.name,
             setNumber: completedSets.length + 1,
-            weight: 0.0,
-            repetitions: workoutExercise.plannedRepetitions,
+            weight: previousSet?.weight ?? 0.0,
+            repetitions: previousSet?.repetitions ?? workoutExercise.plannedRepetitions,
             numberOfExercises: workout.exercises.length,
             exerciseIndex: exerciseIndex,
             plannedSets: workoutExercise.plannedSets,

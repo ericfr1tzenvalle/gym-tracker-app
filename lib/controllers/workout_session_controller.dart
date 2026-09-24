@@ -18,6 +18,11 @@ class WorkoutSessionController {
     return _sessionRepository.startOrResumeSession(workoutId);
   }
 
+  WorkoutSession? getLastCompletedSessionForWorkout(String workoutId){
+    return _sessionRepository.getLastCompletedSessionForWorkout(workoutId);
+  }
+  
+  
   bool completeSession(String sessionId) {
     return _sessionRepository.completeSession(sessionId);
   }
@@ -85,9 +90,5 @@ class WorkoutSessionController {
     return _sessionRepository.removeSession(sessionId);
   }
 
-  bool canModifyWorkout(String workoutId) {
-  final activeSession = _sessionRepository.findActiveSession();
-
-  return activeSession == null || activeSession.workoutId != workoutId;
-  }
+  
 }
