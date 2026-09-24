@@ -84,9 +84,6 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text(progress.workout!.name),
-                const Text('Workout in progress'),
-                const SizedBox(height: 16),
                 WorkoutSetCard(
                   key: ValueKey(
                     '${widget.sessionId}:${exercise.exercise.id}:${progress.currentExerciseCompletedSets}',
@@ -115,8 +112,6 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                     setState(() {});
                   },
                 ),
-                const SizedBox(height: 16),
-                const Text('You can return home and resume this session.'),
               ],
             ),
     );
