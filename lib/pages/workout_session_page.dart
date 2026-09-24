@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/glass_surface.dart';
+
 import '../controllers/workout_session_controller.dart';
 import '../widgets/app_logo.dart';
 import '../widgets/workout_session_actions.dart';
@@ -52,7 +54,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
     final exercise = progress?.currentExercise;
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: const AppLogo(),
         actions: [
           if (progress != null && progress.session.isActive)
@@ -86,7 +88,9 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                 const Text('Workout in progress'),
                 const SizedBox(height: 16),
                 WorkoutSetCard(
-                  key: ValueKey(exercise.exercise.id),
+                  key: ValueKey(
+                    '${widget.sessionId}:${exercise.exercise.id}:${progress.currentExerciseCompletedSets}',
+                  ),
                   exerciseName: exercise.exercise.name,
                   setNumber: progress.currentExerciseCompletedSets + 1,
                   weight: progress.suggestedSet?.weight ?? 0,

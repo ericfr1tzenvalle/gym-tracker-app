@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gym_tracker_app/dev/theme_preview_page.dart';
+
 import '../widgets/workout_card.dart';
 import '../controllers/workout_controller.dart';
 import '../controllers/workout_session_controller.dart';
@@ -60,12 +61,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final workouts = widget.controller.getAllWorkouts();
+    final nextWorkout = widget.controller.getNextWorkout();
     final activeSession = widget.workoutSessionController.getActiveSession();
     final workout = activeSession != null
         ? widget.controller.getWorkoutById(activeSession.workoutId)
-        : workouts.isEmpty
+        : nextWorkout == null
         ? null
-        : workouts.first;
+        : workouts[nextWorkout];
 
     return Scaffold(
       body: SafeArea(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_shell.dart';
+import 'widgets/glass_surface.dart';
 import 'core/theme/app_theme.dart';
 
 void main() {
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
       title: 'Gym Tracker App',
       theme: AppTheme.dark,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) => GlassBackground(child: child!),
       home: AppShell(),
     );
   }

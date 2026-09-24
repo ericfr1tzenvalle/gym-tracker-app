@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'glass_surface.dart';
 import 'package:flutter/services.dart';
 
 class WorkoutSetCard extends StatefulWidget {
@@ -141,11 +142,7 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
           ],
         ),
         const SizedBox(height: 24),
-        Card(
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+        GlassSurface(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Column(
@@ -257,7 +254,7 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
   }) {
     final theme = Theme.of(context);
     final buttonStyle = IconButton.styleFrom(
-      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      backgroundColor: const Color(0x10FFFFFF),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       minimumSize: const Size(48, 56),
       iconSize: 28,

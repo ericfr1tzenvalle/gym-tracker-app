@@ -24,6 +24,10 @@ class WorkoutSessionController {
     return _sessionRepository.startOrResumeSession(workoutId);
   }
 
+  WorkoutSession? getLastCompletedSessionForWorkout(String workoutId) {
+    return _sessionRepository.getLastCompletedSessionForWorkout(workoutId);
+  }
+
   bool completeSession(String sessionId) {
     final session = _sessionRepository.findById(sessionId);
     if (session == null || session.sets.isEmpty) return false;
@@ -129,7 +133,12 @@ class WorkoutSessionController {
       lastSetForCurrentExercise: lastSet,
       suggestedSet: currentExercise == null
           ? null
-          : lastSet ?? _findPreviousSet(session, currentExercise.exercise.id),
+          : _findPreviousSet(
+                  session,
+                  currentExercise.exercise.id,
+                  setsByExercise[currentExercise.exercise.id] ?? 0,
+                ) ??
+                lastSet,
       exerciseIndex: exerciseIndex,
       currentExerciseCompletedSets: currentExercise == null
           ? 0
@@ -141,7 +150,11 @@ class WorkoutSessionController {
     );
   }
 
-  WorkoutSet? _findPreviousSet(WorkoutSession session, String exerciseId) {
+  WorkoutSet? _findPreviousSet(
+    WorkoutSession session,
+    String exerciseId,
+    int setIndex,
+  ) {
     final previousSessions =
         _sessionRepository
             .findSessionsByWorkoutId(session.workoutId)
@@ -155,12 +168,11 @@ class WorkoutSessionController {
             .toList()
           ..sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
 
-    for (final previous in previousSessions) {
-      for (final set in previous.sets.reversed) {
-        if (set.exerciseId == exerciseId) return set;
-      }
-    }
-    return null;
+    if (previousSessions.isEmpty) return null;
+    final previousSets = previousSessions.first.sets
+        .where((set) => set.exerciseId == exerciseId)
+        .toList();
+    return setIndex < previousSets.length ? previousSets[setIndex] : null;
   }
 
   WorkoutSession? getSessionById(String sessionId) {

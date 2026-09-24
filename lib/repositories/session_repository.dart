@@ -1,5 +1,6 @@
 import 'package:gym_tracker_app/models/workout_session_status.dart';
 import 'package:gym_tracker_app/models/workout_set.dart';
+
 import '../models/workout_session.dart';
 
 class SessionRepository {
@@ -51,6 +52,32 @@ class SessionRepository {
     _sessions.add(session);
     _nextSessionId++;
     return session;
+  }
+
+  WorkoutSession? getLastCompletedSessionForWorkout(String workoutId) {
+    final sessions = _sessions
+        .where(
+          (session) =>
+              session.workoutId == workoutId &&
+              session.status == WorkoutSessionStatus.completed,
+        )
+        .toList();
+
+    if (sessions.isEmpty) return null;
+
+    sessions.sort((a, b) => b.startedAt.compareTo(a.startedAt));
+    return sessions.first;
+  }
+
+  WorkoutSession? getLastCompletedSession() {
+    final sessions = _sessions
+        .where((session) => session.status == WorkoutSessionStatus.completed)
+        .toList();
+
+    if (sessions.isEmpty) return null;
+
+    sessions.sort((a, b) => b.startedAt.compareTo(a.startedAt));
+    return sessions.first;
   }
 
   bool completeSession(String sessionId) {
@@ -130,5 +157,11 @@ class SessionRepository {
         .toList();
     sessions.sort((a, b) => b.startedAt.compareTo(a.startedAt));
     return sessions;
+  }
+
+  bool hasActiveSessionForWorkout(String workoutId) {
+    final activeSession = findActiveSession();
+
+    return activeSession?.workoutId == workoutId;
   }
 }
