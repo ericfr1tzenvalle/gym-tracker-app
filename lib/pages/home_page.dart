@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gym_tracker_app/dev/theme_preview_page.dart';
 
 import '../widgets/workout_card.dart';
+import '../widgets/workout_card_empty.dart';
+import '../widgets/create_workout_dialog.dart';
 import '../controllers/workout_controller.dart';
 import '../controllers/workout_session_controller.dart';
 import 'workout_session_page.dart';
@@ -22,6 +24,31 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _openingSession = false;
+  bool _creationDialogOpen = false;
+
+  Future<void> _createWorkout() async {
+    if (_creationDialogOpen) return;
+    _creationDialogOpen = true;
+    try {
+      final created = await showDialog<bool>(
+        context: context,
+        builder: (context) => CreateWorkoutDialog(
+          onCreate: (name) {
+            if (!mounted) return 'This page is no longer available.';
+            final error = widget.controller.validateWorkoutName(name);
+            if (error != null) return error;
+            return widget.controller.createWorkout(name)
+                ? null
+                : 'Could not create the workout. Try again.';
+          },
+        ),
+      );
+      if (!mounted || created != true) return;
+      setState(() {});
+    } finally {
+      _creationDialogOpen = false;
+    }
+  }
 
   Future<void> _openSession(String? workoutId) async {
     if (_openingSession) return;
@@ -93,7 +120,9 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          activeSession != null
+                          workouts.isEmpty
+                              ? 'Create your first workout'
+                              : activeSession != null
                               ? 'Continue your active workout'
                               : 'Your workout for today is',
                           style: textTheme.bodyMedium,
@@ -117,8 +146,8 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
-                child: workout == null && activeSession == null
-                    ? const Text('Create a workout in the Workouts tab.')
+                child: workouts.isEmpty
+                    ? WorkoutCardEmpty(onTap: _createWorkout)
                     : WorkoutCard(
                         title: workout?.name ?? 'Workout unavailable',
                         exercises:

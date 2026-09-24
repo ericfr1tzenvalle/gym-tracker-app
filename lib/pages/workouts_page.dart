@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gym_tracker_app/widgets/create_workout_dialog.dart';
 import '../widgets/workout_list_card.dart';
+import '../widgets/workout_card_empty.dart';
 import '../controllers/workout_controller.dart';
 import 'workout_details.dart';
 
@@ -84,35 +85,40 @@ class _WorkoutsPageState extends State<WorkoutsPage> {
               ),
               const SizedBox(height: 12),
               Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.only(bottom: 112),
-                  itemCount: workouts.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final treino = workouts[index];
+                child: workouts.isEmpty
+                    ? ListView(
+                        padding: const EdgeInsets.only(bottom: 112),
+                        children: [WorkoutCardEmpty(onTap: _createWorkout)],
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.only(bottom: 112),
+                        itemCount: workouts.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final treino = workouts[index];
 
-                    return WorkoutListCard(
-                      title: treino.name,
-                      exerciseCount: treino.exercises.length,
-                      onTap: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return WorkoutDetails(
-                                workout: treino,
-                                controller: widget.controller,
+                          return WorkoutListCard(
+                            title: treino.name,
+                            exerciseCount: treino.exercises.length,
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return WorkoutDetails(
+                                      workout: treino,
+                                      controller: widget.controller,
+                                    );
+                                  },
+                                ),
                               );
+                              if (!context.mounted) return;
+                              setState(() {});
                             },
-                          ),
-                        );
-                        if (!context.mounted) return;
-                        setState(() {});
-                      },
-                    );
-                  },
-                ),
+                          );
+                        },
+                      ),
               ),
             ],
           ),
