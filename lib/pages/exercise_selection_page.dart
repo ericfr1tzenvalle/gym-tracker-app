@@ -4,7 +4,6 @@ import 'package:gym_tracker_app/controllers/workout_controller.dart';
 import 'package:gym_tracker_app/models/muscle_groups.dart';
 import 'package:gym_tracker_app/widgets/app_logo.dart';
 import 'package:gym_tracker_app/widgets/glass_surface.dart';
-import 'package:gym_tracker_app/models/exercises.dart';
 
 class ExerciseSelectionPage extends StatefulWidget {
   const ExerciseSelectionPage({
@@ -23,12 +22,17 @@ class ExerciseSelectionPage extends StatefulWidget {
 }
 
 class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
-  int? _selectedMuscleGroupIndex;
-  late List<Exercise> _filteredExercises = widget.exerciseController
-      .getAllExercises();
+  MuscleGroup? _selectedMuscleGroup;
 
   @override
   Widget build(BuildContext context) {
+    final allExercises = widget.exerciseController.getAllExercises();
+    final filteredExercises = _selectedMuscleGroup == null
+        ? allExercises
+        : allExercises
+            .where((exercise) => exercise.muscleGroup == _selectedMuscleGroup)
+            .toList();
+
     return Scaffold(
       appBar: GlassAppBar(title: const AppLogo()),
       body: SafeArea(
@@ -45,12 +49,10 @@ class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
                   if (index == 0) {
                     return ChoiceChip(
                       label: const Text('ALL'),
-                      selected: _selectedMuscleGroupIndex == null,
+                      selected: _selectedMuscleGroup == null,
                       onSelected: (_) {
                         setState(() {
-                          _selectedMuscleGroupIndex = null;
-                          _filteredExercises = widget.exerciseController
-                              .getAllExercises();
+                          _selectedMuscleGroup = null;
                         });
                       },
                       labelStyle: TextStyle(
@@ -62,22 +64,13 @@ class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
                       selectedColor: Colors.black,
                     );
                   }
-                  final muscleGroupName = getNameOfMuscleGroups()[index - 1];
+                  final muscleGroup = MuscleGroup.values[index - 1];
                   return ChoiceChip(
-                    label: Text(muscleGroupName),
-                    selected: _selectedMuscleGroupIndex == index,
+                    label: Text(muscleGroup.name.toUpperCase()),
+                    selected: _selectedMuscleGroup == muscleGroup,
                     onSelected: (bool isSelected) {
                       setState(() {
-                        _selectedMuscleGroupIndex = isSelected ? index : null;
-                        _filteredExercises = widget.exerciseController
-                            .getAllExercises();
-                        _filteredExercises = _filteredExercises
-                            .where(
-                              (exercise) =>
-                                  exercise.muscleGroup.name.toUpperCase() ==
-                                  muscleGroupName,
-                            )
-                            .toList();
+                        _selectedMuscleGroup = isSelected ? muscleGroup : null;
                       });
                     },
                     labelStyle: TextStyle(
@@ -92,7 +85,7 @@ class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
                 separatorBuilder: ((context, index) {
                   return SizedBox(width: 8);
                 }),
-                itemCount: getAllMuscleGroups() + 1,
+                itemCount: MuscleGroup.values.length + 1,
                 scrollDirection: Axis.horizontal,
               ),
             ),
@@ -107,13 +100,13 @@ class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
             Expanded(
               child: ListView.separated(
                 itemBuilder: (context, index) {
-                  final exercise = _filteredExercises[index];
+                  final exercise = filteredExercises[index];
                   return ListTile(title: Text(exercise.name));
                 },
                 separatorBuilder: (context, index) {
                   return const SizedBox(height: 8);
                 },
-                itemCount: _filteredExercises.length,
+                itemCount: filteredExercises.length,
               ),
             ),
           ],
