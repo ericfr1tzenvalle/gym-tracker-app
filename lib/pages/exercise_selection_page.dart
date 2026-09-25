@@ -23,7 +23,7 @@ class ExerciseSelectionPage extends StatefulWidget {
 }
 
 class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
-  int? _selectedMuscleGroupIndex = 0;
+  int? _selectedMuscleGroupIndex;
   late List<Exercise> _filteredExercises = widget.exerciseController
       .getAllExercises();
 
