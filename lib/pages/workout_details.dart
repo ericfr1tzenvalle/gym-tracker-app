@@ -10,12 +10,12 @@ import '../widgets/glass_surface.dart';
 class WorkoutDetails extends StatefulWidget {
   final Workout workout;
   final WorkoutController controller;
-  final ExerciseController _exerciseController;
+  final ExerciseController exerciseController;
   const WorkoutDetails({
     super.key,
     required this.workout,
     required this.controller,
-    required this._exerciseController,
+    required this.exerciseController,
   });
 
   @override
@@ -121,7 +121,7 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
                         builder: (context) => ExerciseSelectionPage(
                           workoutId: workout.id,
                           controller: widget.controller,
-                          exerciseController: widget._exerciseController,
+                          exerciseController: widget.exerciseController,
                         ),
                       ),
                     );
