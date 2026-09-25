@@ -8,11 +8,11 @@ import '../controllers/exercise_controller.dart';
 
 class WorkoutsPage extends StatefulWidget {
   final WorkoutController controller;
-  final ExerciseController _exerciseController;
+  final ExerciseController exerciseController;
   const WorkoutsPage({
     super.key,
     required this.controller,
-    required this._exerciseController,
+    required this.exerciseController,
   });
 
   @override
@@ -116,7 +116,7 @@ class _WorkoutsPageState extends State<WorkoutsPage> {
                                       workout: treino,
                                       controller: widget.controller,
                                       exerciseController:
-                                          widget._exerciseController,
+                                          widget.exerciseController,
                                     );
                                   },
                                 ),
