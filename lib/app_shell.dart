@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gym_tracker_app/controllers/exercise_controller.dart';
 import 'package:gym_tracker_app/pages/evolution_page.dart';
 import 'package:gym_tracker_app/pages/home_page.dart';
 import 'package:gym_tracker_app/pages/profile_page.dart';
 import 'package:gym_tracker_app/pages/workouts_page.dart';
+import 'package:gym_tracker_app/repositories/exercise_repository.dart';
 import 'widgets/app_logo.dart';
 import 'widgets/glass_surface.dart';
 import 'controllers/workout_controller.dart';
@@ -20,6 +22,8 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   final _workoutRepository = WorkoutRepository();
   final _sessionRepository = SessionRepository();
+  final _exerciseRepository = ExerciseRepository();
+  late final _exerciseController = ExerciseController(_exerciseRepository);
   late final _workoutController = WorkoutController(
     _workoutRepository,
     _sessionRepository,
@@ -35,7 +39,10 @@ class _AppShellState extends State<AppShell> {
       controller: _workoutController,
       workoutSessionController: _workoutSessionController,
     ),
-    WorkoutsPage(controller: _workoutController),
+    WorkoutsPage(
+      controller: _workoutController,
+      exerciseController: _exerciseController,
+    ),
     const EvolutionPage(),
     const ProfilePage(),
   ];

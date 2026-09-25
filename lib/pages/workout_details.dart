@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gym_tracker_app/controllers/exercise_controller.dart';
+import 'package:gym_tracker_app/pages/exercise_selection_page.dart';
 import 'package:gym_tracker_app/widgets/app_logo.dart';
 import 'package:gym_tracker_app/widgets/create_workout_dialog.dart';
 import '../controllers/workout_controller.dart';
@@ -8,10 +10,12 @@ import '../widgets/glass_surface.dart';
 class WorkoutDetails extends StatefulWidget {
   final Workout workout;
   final WorkoutController controller;
+  final ExerciseController _exerciseController;
   const WorkoutDetails({
     super.key,
     required this.workout,
     required this.controller,
+    required this._exerciseController,
   });
 
   @override
@@ -109,7 +113,20 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
         child: Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: FloatingActionButton.extended(
-            onPressed: canModify ? () {} : _showActiveNotice,
+            onPressed: canModify
+                ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ExerciseSelectionPage(
+                          workoutId: workout.id,
+                          controller: widget.controller,
+                          exerciseController: widget._exerciseController,
+                        ),
+                      ),
+                    );
+                  }
+                : _showActiveNotice,
             backgroundColor: canModify
                 ? const Color(0xFFCA2123)
                 : Theme.of(context).disabledColor.withValues(alpha: 0.12),

@@ -4,10 +4,16 @@ import '../widgets/workout_list_card.dart';
 import '../widgets/workout_card_empty.dart';
 import '../controllers/workout_controller.dart';
 import 'workout_details.dart';
+import '../controllers/exercise_controller.dart';
 
 class WorkoutsPage extends StatefulWidget {
   final WorkoutController controller;
-  const WorkoutsPage({super.key, required this.controller});
+  final ExerciseController _exerciseController;
+  const WorkoutsPage({
+    super.key,
+    required this.controller,
+    required this._exerciseController,
+  });
 
   @override
   State<WorkoutsPage> createState() => _WorkoutsPageState();
@@ -109,6 +115,8 @@ class _WorkoutsPageState extends State<WorkoutsPage> {
                                     return WorkoutDetails(
                                       workout: treino,
                                       controller: widget.controller,
+                                      exerciseController:
+                                          widget._exerciseController,
                                     );
                                   },
                                 ),
