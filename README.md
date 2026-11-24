@@ -55,3 +55,15 @@ Login online → criar treino pelo catálogo → iniciar pela Home → ativar mo
 - **Build Android:** `JAVA_HOME=/usr/lib/jvm/java-17-openjdk flutter build apk --debug` passou.
 - **Android instalado:** o APK do commit `905def9` foi instalado no Samsung SM-J810M. A tela de login abriu e permaneceu utilizável com o teclado. O roteiro autenticado no Android segue pendente.
 - **Firebase Console:** a configuração Android compilou com o JSON fornecido. A habilitação do provedor Email/Password e a conta de teste não foram verificadas no Console nem em login instalado.
+
+## APK para a apresentação
+
+Gere um único APK Android para aparelhos ARM de 32 e 64 bits:
+
+```bash
+flutter build apk --release --target-platform android-arm,android-arm64
+mkdir -p entrega-apk
+cp build/app/outputs/flutter-apk/app-release.apk entrega-apk/lilgym-release.apk
+```
+
+Abra `lilgym-release.apk` no aparelho para instalar. O primeiro login ou cadastro exige acesso à internet. Este APK de apresentação usa a assinatura definida no projeto para testes.

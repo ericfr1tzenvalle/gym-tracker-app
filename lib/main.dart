@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Gym Tracker App',
+      title: 'lilgym',
       theme: AppTheme.dark,
       debugShowCheckedModeBanner: false,
       builder: (context, child) => GlassBackground(child: child!),
