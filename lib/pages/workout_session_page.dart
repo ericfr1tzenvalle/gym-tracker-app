@@ -116,6 +116,12 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
       widget.sessionId,
     );
     final exercise = progress?.currentExercise;
+    final showFinishButton =
+        progress != null &&
+        progress.session.isActive &&
+        (exercise == null ||
+            progress.exerciseIndex ==
+                (progress.workout?.exercises.length ?? 0) - 1);
 
     return Scaffold(
       appBar: GlassAppBar(
@@ -129,12 +135,19 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
             ),
         ],
       ),
-      bottomNavigationBar: progress != null && progress.session.isActive
+      bottomNavigationBar: showFinishButton
           ? SafeArea(
               top: false,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                 child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(56),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   onPressed: progress.totalCompletedSets == 0
                       ? null
                       : () => _endSession(cancel: false),

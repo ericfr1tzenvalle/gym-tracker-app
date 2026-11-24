@@ -40,7 +40,11 @@ class EvolutionPage extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
               child: Text(
                 title,
-                style: const TextStyle(fontFamily: 'MatchaMint', fontSize: 22),
+                style: const TextStyle(
+                  fontFamily: 'MatchaMint',
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
             const TabBar(
