@@ -12,10 +12,10 @@ Sibling project of [lilnote](https://github.com/ericfr1tzenvalle/lilnote) and [l
 
 ## A little less friction
 
-- Create and rename workouts, with exercise counts at a glance.
+- Build workouts from the exercise catalog.
 - Log weight and reps, with previous-session values ready for your next set.
-- Leave a session and resume it while the app stays open.
-- Finish your workout, see your summary, and move on to the next one.
+- Pick up an active session after restarting the app.
+- Finish your workout and look back at your sessions and sets in History.
 
 <p align="center">
   <img src="docs/images/workouts.png" width="30%" alt="Workout list with exercise counts" />
@@ -25,11 +25,22 @@ Sibling project of [lilnote](https://github.com/ericfr1tzenvalle/lilnote) and [l
 
 ## Run it
 
-With Flutter installed and a device or desktop target available:
+You'll need Flutter, the Android SDK, JDK 17, and an Android device or emulator. In Firebase Authentication, enable **Email/Password** and place the Android configuration in `android/app/google-services.json`. The Firebase Android package must match `com.example.gym_tracker`.
 
 ```bash
 flutter pub get
-flutter run
+flutter devices
+flutter run -d <android-device-id>
 ```
 
-Still growing: data currently lives in memory and resets when the app restarts. Exercise selection, persistent storage, and progress charts are not available yet. The preview uses the app's sample workouts.
+Sign in or create an account online. Workouts and history are stored on the device, separately for each account, and are available offline after sign-in.
+
+### Checks and APK
+
+```bash
+flutter analyze
+flutter test
+flutter build apk --release --target-platform android-arm,android-arm64
+```
+
+Find the APK at `build/app/outputs/flutter-apk/app-release.apk`. It supports ARM Android phones on Android 7 or later.
