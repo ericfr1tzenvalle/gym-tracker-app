@@ -1,3 +1,4 @@
+import '../models/set_validation.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/glass_surface.dart';
@@ -63,7 +64,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                 decimal: true,
               ),
               decoration: const InputDecoration(
-                labelText: 'Weight (kg), minimum 0',
+                labelText: 'Weight (kg), greater than zero',
               ),
             ),
             TextField(
@@ -84,7 +85,10 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
             onPressed: () {
               final w = double.tryParse(weight.text.replaceAll(',', '.'));
               final r = int.tryParse(reps.text);
-              if (w == null || !w.isFinite || w < 0 || r == null || r <= 0) {
+              if (w == null ||
+                  !SetValidation.validWeight(w) ||
+                  r == null ||
+                  !SetValidation.validRepetitions(r)) {
                 return;
               }
               Navigator.pop(context, (w, r));

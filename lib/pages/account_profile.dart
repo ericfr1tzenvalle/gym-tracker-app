@@ -40,17 +40,47 @@ class ProfilePortrait extends StatelessWidget {
   final int index;
   final double radius;
 
+  static const count = 8;
+  // The first three source images are already monochrome.
+  static const _grayscale = ColorFilter.matrix([
+    .2126,
+    .7152,
+    .0722,
+    0,
+    0,
+    .2126,
+    .7152,
+    .0722,
+    0,
+    0,
+    .2126,
+    .7152,
+    .0722,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+  ]);
+
   @override
-  Widget build(BuildContext context) => ClipOval(
-    child: Image.asset(
+  Widget build(BuildContext context) {
+    final image = Image.asset(
       'lib/assets/portraits/portrait-$index.jpg',
       width: radius * 2,
       height: radius * 2,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stack) =>
           CircleAvatar(radius: radius, child: const Icon(Icons.person)),
-    ),
-  );
+    );
+    return ClipOval(
+      child: index < 3
+          ? image
+          : ColorFiltered(colorFilter: _grayscale, child: image),
+    );
+  }
 }
 
 class PortraitChoices extends StatelessWidget {
@@ -67,7 +97,7 @@ class PortraitChoices extends StatelessWidget {
     spacing: 8,
     runSpacing: 8,
     children: List.generate(
-      4,
+      ProfilePortrait.count,
       (index) => Semantics(
         selected: index == selected,
         button: true,

@@ -31,7 +31,7 @@ O arquivo gerado fica em `build/app/outputs/flutter-apk/app-debug.apk`. Para ins
 
 ## Fluxo atual
 
-Faça login com a conta de demonstração. No primeiro acesso de cada conta neste aparelho, escolha um retrato e informe nome de usuário, peso, altura e meta semanal. Uma conta nova começa sem treinos. Crie um treino na Home ou em Workouts, abra os detalhes e toque em **Exercise** para incluir um exercício do catálogo. O plano inicial é 3 séries de 8–12 repetições; toque no exercício para editar a faixa e segure para reordenar. Na Home, inicie o treino de hoje ou retome a sessão ativa. Use o botão de troca para escolher outro treino. A Home mostra o volume levantado e o progresso da meta desde segunda-feira. Registre séries com carga igual ou maior que zero e repetições inteiras positivas. A sessão só termina ao tocar em **Finalizar treino**. O botão History em Workouts mostra sessões concluídas e os registros por exercício. A aba History também dá acesso ao histórico geral. Nos detalhes de um treino, History mostra apenas as sessões e os exercícios daquele treino. Em Profile, você pode editar peso e altura, trocar e-mail ou senha e fazer logout. O logout mantém os dados locais da conta.
+Faça login com a conta de demonstração. No primeiro acesso de cada conta neste aparelho, escolha um retrato e informe nome de usuário, peso, altura e meta semanal. Uma conta nova começa sem treinos. Crie um treino na Home ou em Workouts, abra os detalhes e toque em **Exercise** para incluir um exercício do catálogo. O plano inicial é 3 séries de 8–12 repetições; toque no exercício para editar a faixa e segure para reordenar. Na Home, inicie o treino de hoje ou retome a sessão ativa. Use o botão de troca para escolher outro treino. A Home mostra o volume levantado e o progresso da meta desde segunda-feira. Registre séries com carga maior que zero e repetições inteiras positivas. A sessão só termina ao tocar em **Finish Workout**. O botão History em Workouts mostra sessões concluídas e os registros por exercício. A aba History também dá acesso ao histórico geral. Nos detalhes de um treino, History mostra apenas as sessões e os exercícios daquele treino. Em Profile, você pode editar peso e altura, trocar e-mail ou senha e fazer logout. O logout mantém os dados locais da conta.
 
 O histórico preserva o nome do treino e do exercício na sessão, inclusive após excluir o treino. Sessões canceladas não aparecem no histórico nem geram sugestões. Não há cadastro de exercícios pelo usuário, Firestore, sincronização em nuvem, gráficos ou agenda semanal.
 
@@ -51,7 +51,7 @@ Login online → criar treino pelo catálogo → iniciar pela Home → ativar mo
 
 - **Análise de código:** `flutter analyze` passou sem problemas.
 - **Testes de código:** `flutter test` passou (validação de carga/repetições e isolamento SQLite por `uid`).
-- **Teste de widget:** passou o caso 0 kg × 0 repetições rejeitado e 0 kg × 10 repetições aceito.
+- **Teste de widget:** carga zero e repetições zero são rejeitadas separadamente.
 - **Build Android:** `JAVA_HOME=/usr/lib/jvm/java-17-openjdk flutter build apk --debug` passou.
 - **Android instalado:** o APK do commit `905def9` foi instalado no Samsung SM-J810M. A tela de login abriu e permaneceu utilizável com o teclado. O roteiro autenticado no Android segue pendente.
 - **Firebase Console:** a configuração Android compilou com o JSON fornecido. A habilitação do provedor Email/Password e a conta de teste não foram verificadas no Console nem em login instalado.

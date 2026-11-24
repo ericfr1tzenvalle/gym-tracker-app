@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gym_tracker_app/models/set_validation.dart';
 
 void main() {
-  test('zero load is valid, negative and non finite loads are rejected', () {
-    expect(SetValidation.validWeight(0), isTrue);
+  test('zero, negative, and non-finite weights are rejected', () {
+    expect(SetValidation.validWeight(0), isFalse);
     expect(SetValidation.validWeight(20.5), isTrue);
     expect(SetValidation.validWeight(-1), isFalse);
     expect(SetValidation.validWeight(double.nan), isFalse);
