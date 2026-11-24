@@ -46,3 +46,12 @@ O histórico preserva o nome do treino e do exercício na sessão, inclusive ap�
 ## Roteiro da apresentação
 
 Login online → criar treino pelo catálogo → iniciar pela Home → ativar modo avião → registrar série → fechar e reabrir → retomar e corrigir → finalizar pelo botão visível → mostrar histórico por sessão e por exercício.
+
+## Validação da entrega (24/11/2026)
+
+- **Análise de código:** `flutter analyze` passou sem problemas.
+- **Testes de código:** `flutter test` passou (validação de carga/repetições e isolamento SQLite por `uid`).
+- **Teste de widget:** passou o caso 0 kg × 0 repetições rejeitado e 0 kg × 10 repetições aceito.
+- **Build Android:** `JAVA_HOME=/usr/lib/jvm/java-17-openjdk flutter build apk --debug` passou.
+- **Android instalado:** bloqueado; `flutter devices` encontrou apenas Linux e Chrome, e `flutter emulators` não encontrou AVD. O roteiro de modo avião, login real e inspeção em tela pequena precisa ser executado em um Android.
+- **Firebase Console:** a configuração Android compilou com o JSON fornecido. A habilitação do provedor Email/Password e a conta de teste não foram verificadas no Console nem em login instalado.
