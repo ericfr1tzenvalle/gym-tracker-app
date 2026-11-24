@@ -81,9 +81,8 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
     if (_submitted) return;
     if (!_hasValidWeight || !_hasValidRepetitions) {
       final messages = [
-        if (!_hasValidWeight) 'Informe uma carga igual ou maior que zero.',
-        if (!_hasValidRepetitions)
-          'Informe repetições inteiras maiores que zero.',
+        if (!_hasValidWeight) 'Enter a weight of zero or more.',
+        if (!_hasValidRepetitions) 'Enter a positive whole number of reps.',
       ];
       FocusManager.instance.primaryFocus?.unfocus();
       ScaffoldMessenger.of(context)

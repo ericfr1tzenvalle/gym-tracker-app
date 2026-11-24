@@ -68,18 +68,18 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Excluir treino?'),
+        title: const Text('Delete workout?'),
         content: Text(
-          'O treino ${workout.name} será excluído. O histórico será preservado.',
+          'Delete ${workout.name}? Completed sessions will stay in your history.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Excluir'),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -140,28 +140,24 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
             TextField(
               controller: sets,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Séries'),
+              decoration: const InputDecoration(labelText: 'Sets'),
             ),
             TextField(
               controller: minimum,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Repetições mínimas',
-              ),
+              decoration: const InputDecoration(labelText: 'Minimum reps'),
             ),
             TextField(
               controller: maximum,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Repetições máximas',
-              ),
+              decoration: const InputDecoration(labelText: 'Maximum reps'),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () {
@@ -178,7 +174,7 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
               }
               Navigator.pop(context, (a, b, c));
             },
-            child: const Text('Salvar'),
+            child: const Text('Save'),
           ),
         ],
       ),
@@ -351,7 +347,7 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
                               ),
                             ),
                             subtitle: Text(
-                              '${exercises.plannedSets} séries • ${exercises.plannedMinRepetitions}–${exercises.plannedRepetitions} reps',
+                              '${exercises.plannedSets} sets • ${exercises.plannedMinRepetitions}–${exercises.plannedRepetitions} reps',
                             ),
                             onTap: canModify
                                 ? () =>

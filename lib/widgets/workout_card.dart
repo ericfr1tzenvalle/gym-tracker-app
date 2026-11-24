@@ -7,12 +7,14 @@ class WorkoutCard extends StatelessWidget {
   final List<String> exercises;
   final VoidCallback onStart;
   final String actionLabel;
+  final VoidCallback? onSwap;
 
   const WorkoutCard({
     super.key,
     required this.title,
     required this.exercises,
     required this.onStart,
+    this.onSwap,
     this.actionLabel = 'Start Workout',
   });
 
@@ -23,10 +25,10 @@ class WorkoutCard extends StatelessWidget {
     var subtitle = preview;
 
     if (remaining > 0) {
-      var word = 'exercícios';
+      var word = 'exercises';
 
       if (remaining == 1) {
-        word = 'exercício';
+        word = 'exercise';
       }
 
       subtitle = '$preview + $remaining $word';
@@ -55,7 +57,7 @@ class WorkoutCard extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: onSwap,
                   icon: const Icon(Icons.swap_horiz),
                   tooltip: 'Swap Workout',
                 ),

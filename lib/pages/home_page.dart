@@ -140,7 +140,7 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Olá, ${widget.username}!',
+                          'Hi, ${widget.username}!',
                           style: const TextStyle(
                             fontSize: 16,
                             fontFamily: 'MatchaMint',
@@ -159,38 +159,6 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: activeSession != null || alternatives.isEmpty
-                        ? null
-                        : () async {
-                            final id = await showModalBottomSheet<String>(
-                              context: context,
-                              useSafeArea: true,
-                              builder: (context) => ListView(
-                                shrinkWrap: true,
-                                children: [
-                                  const ListTile(
-                                    title: Text('Trocar treino de hoje'),
-                                  ),
-                                  for (final item in alternatives)
-                                    ListTile(
-                                      title: Text(item.name),
-                                      subtitle: Text(
-                                        '${item.exercises.length} exercícios',
-                                      ),
-                                      onTap: () =>
-                                          Navigator.pop(context, item.id),
-                                    ),
-                                ],
-                              ),
-                            );
-                            if (mounted && id != null) {
-                              setState(() => _selectedWorkoutId = id);
-                            }
-                          },
-                    tooltip: 'Trocar treino',
-                    icon: const Icon(Icons.swap_horiz),
-                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -208,17 +176,45 @@ class _HomePageState extends State<HomePage> {
                         actionLabel: activeSession != null
                             ? 'Resume Workout'
                             : 'Start Workout',
+                        onSwap: activeSession != null || alternatives.isEmpty
+                            ? null
+                            : () async {
+                                final id = await showModalBottomSheet<String>(
+                                  context: context,
+                                  useSafeArea: true,
+                                  builder: (context) => ListView(
+                                    shrinkWrap: true,
+                                    children: [
+                                      const ListTile(
+                                        title: Text('Swap Today\'s Workout'),
+                                      ),
+                                      for (final item in alternatives)
+                                        ListTile(
+                                          title: Text(item.name),
+                                          subtitle: Text(
+                                            '${item.exercises.length} exercises',
+                                          ),
+                                          onTap: () =>
+                                              Navigator.pop(context, item.id),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                                if (mounted && id != null) {
+                                  setState(() => _selectedWorkoutId = id);
+                                }
+                              },
                         onStart: () => _openSession(workout?.id),
                       ),
               ),
               const SizedBox(height: 16),
               ListTile(
-                title: const Text('Peso levantado nesta semana'),
+                title: const Text('Weight lifted this week'),
                 subtitle: Text('${volume.toStringAsFixed(1)} kg'),
               ),
               ListTile(
-                title: const Text('Treinos concluídos nesta semana'),
-                subtitle: Text('${completed.length} de ${widget.weeklyGoal}'),
+                title: const Text('Workouts completed this week'),
+                subtitle: Text('${completed.length} of ${widget.weeklyGoal}'),
               ),
             ],
           ),

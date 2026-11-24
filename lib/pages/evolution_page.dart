@@ -20,18 +20,18 @@ class EvolutionPage extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Histórico'),
+          title: Text('History'),
           bottom: TabBar(
             tabs: [
-              Tab(text: 'Sessões'),
-              Tab(text: 'Exercícios'),
+              Tab(text: 'Sessions'),
+              Tab(text: 'Exercises'),
             ],
           ),
         ),
         body: TabBarView(
           children: [
             sessions.isEmpty
-                ? const Center(child: Text('Nenhum treino concluído.'))
+                ? const Center(child: Text('No completed workouts.'))
                 : ListView.builder(
                     itemCount: sessions.length,
                     itemBuilder: (context, index) {
@@ -39,7 +39,7 @@ class EvolutionPage extends StatelessWidget {
                       return ListTile(
                         title: Text(session.workoutName),
                         subtitle: Text(
-                          '${session.startedAt.day}/${session.startedAt.month}/${session.startedAt.year} • ${session.sets.length} séries',
+                          '${session.startedAt.day}/${session.startedAt.month}/${session.startedAt.year} • ${session.sets.length} sets',
                         ),
                         onTap: () => Navigator.push(
                           context,
@@ -52,7 +52,7 @@ class EvolutionPage extends StatelessWidget {
                                     ListTile(
                                       title: Text(set.exerciseName),
                                       subtitle: Text(
-                                        '${set.weight} kg × ${set.repetitions} repetições',
+                                        '${set.weight} kg × ${set.repetitions} reps',
                                       ),
                                     ),
                                 ],
@@ -70,7 +70,7 @@ class EvolutionPage extends StatelessWidget {
                     for (final set in session.sets) set.exerciseName,
                 }.toList()..sort();
                 return names.isEmpty
-                    ? const Center(child: Text('Nenhum exercício registrado.'))
+                    ? const Center(child: Text('No exercises logged.'))
                     : ListView(
                         children: [
                           for (final name in names)
@@ -83,7 +83,7 @@ class EvolutionPage extends StatelessWidget {
                                   ))
                                     ListTile(
                                       title: Text(
-                                        '${set.weight} kg × ${set.repetitions} repetições',
+                                        '${set.weight} kg × ${set.repetitions} reps',
                                       ),
                                       subtitle: Text(
                                         '${session.startedAt.day}/${session.startedAt.month}/${session.startedAt.year} • ${session.workoutName}',

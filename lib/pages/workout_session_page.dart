@@ -53,7 +53,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
     final edited = await showDialog<(double, int)>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Editar série • ${set.exerciseName}'),
+        title: Text('Edit set • ${set.exerciseName}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -63,14 +63,14 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                 decimal: true,
               ),
               decoration: const InputDecoration(
-                labelText: 'Carga (kg), mínimo 0',
+                labelText: 'Weight (kg), minimum 0',
               ),
             ),
             TextField(
               controller: reps,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: 'Repetições, inteiro positivo',
+                labelText: 'Reps, positive whole number',
               ),
             ),
           ],
@@ -78,7 +78,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () {
@@ -89,7 +89,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
               }
               Navigator.pop(context, (w, r));
             },
-            child: const Text('Salvar'),
+            child: const Text('Save'),
           ),
         ],
       ),
@@ -135,7 +135,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                       ? null
                       : () => _endSession(cancel: false),
                   icon: const Icon(Icons.check_circle_outline),
-                  label: const Text('Finalizar treino'),
+                  label: const Text('Finish Workout'),
                 ),
               ),
             )
@@ -152,7 +152,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
               children: [
                 const Text(
-                  'Todas as séries planejadas foram registradas. Você pode corrigir ou finalizar.',
+                  'All planned sets are logged. You can edit them or finish your workout.',
                 ),
                 const SizedBox(height: 16),
                 for (final set in progress.session.sets)
@@ -165,7 +165,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                         IconButton(
                           onPressed: () => _editSet(set),
                           icon: const Icon(Icons.edit),
-                          tooltip: 'Editar série',
+                          tooltip: 'Edit set',
                         ),
                         IconButton(
                           onPressed: () {
@@ -177,7 +177,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                             setState(() {});
                           },
                           icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Excluir série',
+                          tooltip: 'Delete set',
                         ),
                       ],
                     ),
@@ -215,7 +215,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                   },
                 ),
                 const SizedBox(height: 20),
-                const Text('Séries registradas'),
+                const Text('Logged sets'),
                 for (final set in progress.session.sets)
                   ListTile(
                     title: Text(
@@ -226,7 +226,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                         IconButton(
                           onPressed: () => _editSet(set),
                           icon: const Icon(Icons.edit),
-                          tooltip: 'Editar série',
+                          tooltip: 'Edit set',
                         ),
                         IconButton(
                           onPressed: () {
@@ -238,7 +238,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                             setState(() {});
                           },
                           icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Excluir série',
+                          tooltip: 'Delete set',
                         ),
                       ],
                     ),

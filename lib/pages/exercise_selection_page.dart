@@ -114,28 +114,26 @@ class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text(
-                                'Sugestão: 3 séries de 8–12 repetições',
-                              ),
+                              const Text('Suggested: 3 sets of 8–12 reps'),
                               TextField(
                                 controller: sets,
                                 keyboardType: TextInputType.number,
                                 decoration: const InputDecoration(
-                                  labelText: 'Séries',
+                                  labelText: 'Sets',
                                 ),
                               ),
                               TextField(
                                 controller: minReps,
                                 keyboardType: TextInputType.number,
                                 decoration: const InputDecoration(
-                                  labelText: 'Repetições mínimas',
+                                  labelText: 'Minimum reps',
                                 ),
                               ),
                               TextField(
                                 controller: reps,
                                 keyboardType: TextInputType.number,
                                 decoration: const InputDecoration(
-                                  labelText: 'Repetições máximas',
+                                  labelText: 'Maximum reps',
                                 ),
                               ),
                             ],
@@ -143,7 +141,7 @@ class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(dialogContext),
-                              child: const Text('Cancelar'),
+                              child: const Text('Cancel'),
                             ),
                             FilledButton(
                               onPressed: () {
@@ -164,7 +162,7 @@ class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
                                   repetitions,
                                 ));
                               },
-                              child: const Text('Adicionar'),
+                              child: const Text('Add'),
                             ),
                           ],
                         ),
@@ -184,8 +182,8 @@ class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
                         SnackBar(
                           content: Text(
                             added
-                                ? 'Exercício adicionado ao treino.'
-                                : 'Este exercício já está no treino.',
+                                ? 'Exercise added to workout.'
+                                : 'This exercise is already in the workout.',
                           ),
                         ),
                       );

@@ -51,18 +51,20 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       setState(
         () => _error = switch (error.code) {
-          'invalid-email' => 'Informe um e-mail válido.',
+          'invalid-email' => 'Enter a valid email address.',
           'invalid-credential' ||
           'wrong-password' ||
-          'user-not-found' => 'E-mail ou senha inválidos.',
+          'user-not-found' => 'Invalid email or password.',
           'network-request-failed' =>
-            'Sem conexão. O primeiro login precisa de internet.',
-          _ => 'Não foi possível entrar (${error.code}).',
+            'Connect to the internet to sign in for the first time.',
+          _ => 'Could not sign in (${error.code}).',
         },
       );
     } catch (_) {
       if (mounted) {
-        setState(() => _error = 'Não foi possível entrar. Confira a conexão.');
+        setState(
+          () => _error = 'Could not sign in. Check your internet connection.',
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -87,20 +89,23 @@ class _LoginPageState extends State<LoginPage> {
             shrinkWrap: true,
             padding: const EdgeInsets.all(24),
             children: [
-              const Text('Entre na sua conta', style: TextStyle(fontSize: 24)),
+              const Text(
+                'Sign in to your account',
+                style: TextStyle(fontSize: 24),
+              ),
               const SizedBox(height: 20),
               TextField(
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
-                decoration: const InputDecoration(labelText: 'E-mail'),
+                decoration: const InputDecoration(labelText: 'Email'),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _password,
                 obscureText: true,
                 autofillHints: const [AutofillHints.password],
-                decoration: const InputDecoration(labelText: 'Senha'),
+                decoration: const InputDecoration(labelText: 'Password'),
                 onSubmitted: (_) => _signIn(),
               ),
               if (_error != null)
@@ -118,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: _loading ? null : _signIn,
                 child: _loading
                     ? const CircularProgressIndicator()
-                    : const Text('Entrar'),
+                    : const Text('Sign In'),
               ),
             ],
           ),

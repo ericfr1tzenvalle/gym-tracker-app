@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gym_tracker_app/controllers/exercise_controller.dart';
 import 'pages/account_profile.dart';
+import 'pages/evolution_page.dart';
 import 'package:gym_tracker_app/pages/home_page.dart';
 import 'package:gym_tracker_app/pages/workouts_page.dart';
 import 'package:gym_tracker_app/repositories/exercise_repository.dart';
@@ -71,6 +72,7 @@ class _AppShellState extends State<AppShell> {
       exerciseController: _exerciseController,
       sessionController: _workoutSessionController!,
     ),
+    EvolutionPage(controller: _workoutSessionController!),
     AccountProfilePage(profile: _profile!, onSave: _saveProfile),
   ];
   int _selectedIndex = 0;
@@ -82,7 +84,7 @@ class _AppShellState extends State<AppShell> {
         if (snapshot.hasError) {
           return Scaffold(
             body: Center(
-              child: Text('Erro ao abrir dados locais: ${snapshot.error}'),
+              child: Text('Could not open local data: ${snapshot.error}'),
             ),
           );
         }
@@ -123,6 +125,11 @@ class _AppShellState extends State<AppShell> {
                       label: 'Workouts',
                     ),
 
+                    NavigationDestination(
+                      icon: Icon(Icons.bar_chart_outlined),
+                      selectedIcon: Icon(Icons.bar_chart),
+                      label: 'Evolution',
+                    ),
                     NavigationDestination(
                       icon: Icon(Icons.person_outline),
                       selectedIcon: Icon(Icons.person),
