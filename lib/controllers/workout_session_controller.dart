@@ -1,4 +1,5 @@
 import 'package:gym_tracker_app/repositories/session_repository.dart';
+import '../models/set_validation.dart';
 
 import '../models/workout_session.dart';
 import '../models/workout_session_progress.dart';
@@ -14,14 +15,14 @@ class WorkoutSessionController {
 
   WorkoutSession startOrResumeSession(String workoutId) {
     if (_sessionRepository.findActiveSession() != null) {
-      return _sessionRepository.startOrResumeSession(workoutId);
+      return _sessionRepository.startOrResumeSession(workoutId, 'Workout');
     }
 
     final workout = _workoutRepository.findById(workoutId);
     if (workout == null || workout.exercises.isEmpty) {
       throw Exception('Workout not found or has no exercises.');
     }
-    return _sessionRepository.startOrResumeSession(workoutId);
+    return _sessionRepository.startOrResumeSession(workoutId, workout.name);
   }
 
   WorkoutSession? getLastCompletedSessionForWorkout(String workoutId) {
@@ -47,9 +48,8 @@ class WorkoutSessionController {
   }) {
     final invalidRpe = rpe != null && (rpe < 1 || rpe > 10);
     if (exerciseId.trim().isEmpty ||
-        !weight.isFinite ||
-        weight <= 0 ||
-        repetitions <= 0 ||
+        !SetValidation.validWeight(weight) ||
+        !SetValidation.validRepetitions(repetitions) ||
         invalidRpe) {
       return null;
     }
@@ -79,10 +79,6 @@ class WorkoutSessionController {
     );
     if (registeredSet == null) return null;
 
-    final updatedProgress = getSessionProgress(sessionId)!;
-    if (updatedProgress.completedExercises == workout.exercises.length) {
-      _sessionRepository.completeSession(sessionId);
-    }
     return registeredSet;
   }
 
@@ -134,11 +130,10 @@ class WorkoutSessionController {
       suggestedSet: currentExercise == null
           ? null
           : _findPreviousSet(
-                  session,
-                  currentExercise.exercise.id,
-                  setsByExercise[currentExercise.exercise.id] ?? 0,
-                ) ??
-                lastSet,
+              session,
+              currentExercise.exercise.id,
+              setsByExercise[currentExercise.exercise.id] ?? 0,
+            ),
       exerciseIndex: exerciseIndex,
       currentExerciseCompletedSets: currentExercise == null
           ? 0
@@ -157,10 +152,11 @@ class WorkoutSessionController {
   ) {
     final previousSessions =
         _sessionRepository
-            .findSessionsByWorkoutId(session.workoutId)
+            .findAll()
             .where(
               (previous) =>
                   previous.id != session.id &&
+                  previous.sets.any((set) => set.exerciseId == exerciseId) &&
                   previous.status == WorkoutSessionStatus.completed &&
                   previous.completedAt != null &&
                   !previous.completedAt!.isAfter(session.startedAt),
@@ -204,6 +200,18 @@ class WorkoutSessionController {
       setId: setId,
     );
   }
+
+  bool updateSet({
+    required String sessionId,
+    required String setId,
+    required double weight,
+    required int repetitions,
+  }) => _sessionRepository.updateSet(
+    sessionId: sessionId,
+    setId: setId,
+    weight: weight,
+    repetitions: repetitions,
+  );
 
   bool deleteSession(String sessionId) {
     return _sessionRepository.removeSession(sessionId);

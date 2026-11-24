@@ -1,3 +1,4 @@
+import 'account_database.dart';
 import '../data/sample_exercises.dart';
 
 import '../models/exercises.dart';
@@ -5,51 +6,45 @@ import '../models/workouts.dart';
 import '../models/workout_exercise.dart';
 
 class WorkoutRepository {
-  final List<Workout> _workouts = [
-    Workout(
-      id: '1',
-      name: 'Push Day',
-      exercises: sampleExercises
-          .where((exercise) => {'6', '7', '8'}.contains(exercise.id))
-          .map(
-            (exercise) => WorkoutExercise(
-              exercise: exercise,
-              plannedSets: 3,
-              plannedRepetitions: 10,
-            ),
-          )
-          .toList(),
-    ),
-    Workout(
-      id: '2',
-      name: 'Pull Day',
-      exercises: sampleExercises
-          .where((exercise) => {'1', '2', '3', '4', '5'}.contains(exercise.id))
-          .map(
-            (exercise) => WorkoutExercise(
-              exercise: exercise,
-              plannedSets: 3,
-              plannedRepetitions: 10,
-            ),
-          )
-          .toList(),
-    ),
-    Workout(
-      id: '3',
-      name: 'Leg Day',
-      exercises: sampleExercises
-          .where((exercise) => {'9', '10', '11'}.contains(exercise.id))
-          .map(
-            (exercise) => WorkoutExercise(
-              exercise: exercise,
-              plannedSets: 3,
-              plannedRepetitions: 10,
-            ),
-          )
-          .toList(),
-    ),
-  ];
-  int _nextWorkoutId = 4;
+  WorkoutRepository(this.store);
+  final AccountDatabase store;
+  final List<Workout> _workouts = [];
+  int _nextWorkoutId = 1;
+
+  Future<void> hydrate() async {
+    final plans = await store.rows('planned_exercises');
+    for (final row in await store.rows('workouts')) {
+      final id = row['id'] as String;
+      final items = plans.where((item) => item['workout_id'] == id).toList()
+        ..sort(
+          (a, b) => (a['position'] as int).compareTo(b['position'] as int),
+        );
+      _workouts.add(
+        Workout(
+          id: id,
+          name: row['name'] as String,
+          exercises: [
+            for (final item in items)
+              if (sampleExercises
+                  .where((e) => e.id == item['exercise_id'])
+                  .isNotEmpty)
+                WorkoutExercise(
+                  exercise: sampleExercises.firstWhere(
+                    (e) => e.id == item['exercise_id'],
+                  ),
+                  plannedSets: item['planned_sets'] as int,
+                  plannedRepetitions: item['planned_repetitions'] as int,
+                  plannedMinRepetitions: item['planned_min'] as int,
+                ),
+          ],
+        ),
+      );
+      final numericId = int.tryParse(id);
+      if (numericId != null && numericId >= _nextWorkoutId) {
+        _nextWorkoutId = numericId + 1;
+      }
+    }
+  }
 
   List<Workout> findAll() => List.unmodifiable(_workouts);
 
@@ -86,6 +81,13 @@ class WorkoutRepository {
     );
     _workouts.add(workout);
     _nextWorkoutId++;
+    store.enqueue((db) async {
+      await db.insert('workouts', {
+        'uid': store.uid,
+        'id': workout.id,
+        'name': workout.name,
+      });
+    });
     return true;
   }
 
@@ -96,6 +98,18 @@ class WorkoutRepository {
     }
 
     _workouts.remove(workout);
+    store.enqueue((db) async {
+      await db.delete(
+        'planned_exercises',
+        where: 'uid = ? AND workout_id = ?',
+        whereArgs: [store.uid, workoutId],
+      );
+      await db.delete(
+        'workouts',
+        where: 'uid = ? AND id = ?',
+        whereArgs: [store.uid, workoutId],
+      );
+    });
     return true;
   }
 
@@ -106,6 +120,14 @@ class WorkoutRepository {
     }
 
     workout.name = name;
+    store.enqueue((db) async {
+      await db.update(
+        'workouts',
+        {'name': name},
+        where: 'uid = ? AND id = ?',
+        whereArgs: [store.uid, workoutId],
+      );
+    });
     return true;
   }
 
@@ -114,9 +136,12 @@ class WorkoutRepository {
     required Exercise exercise,
     required int plannedSets,
     required int plannedRepetitions,
+    required int plannedMinRepetitions,
   }) {
     final workout = findById(workoutId);
-    if (plannedRepetitions < 1 ||
+    if (plannedMinRepetitions < 1 ||
+        plannedMinRepetitions > plannedRepetitions ||
+        plannedRepetitions < 1 ||
         plannedSets < 1 ||
         workout == null ||
         _containsExercise(workout, exercise.id)) {
@@ -128,8 +153,83 @@ class WorkoutRepository {
         exercise: exercise,
         plannedSets: plannedSets,
         plannedRepetitions: plannedRepetitions,
+        plannedMinRepetitions: plannedMinRepetitions,
       ),
     );
+    final position = workout.exercises.length - 1;
+    store.enqueue((db) async {
+      await db.insert('planned_exercises', {
+        'uid': store.uid,
+        'workout_id': workoutId,
+        'exercise_id': exercise.id,
+        'position': position,
+        'planned_sets': plannedSets,
+        'planned_repetitions': plannedRepetitions,
+        'planned_min': plannedMinRepetitions,
+      });
+    });
+    return true;
+  }
+
+  bool updateExercisePlan(
+    String workoutId,
+    String exerciseId,
+    int plannedSets,
+    int plannedMinRepetitions,
+    int plannedRepetitions,
+  ) {
+    if (plannedSets < 1 ||
+        plannedMinRepetitions < 1 ||
+        plannedMinRepetitions > plannedRepetitions) {
+      return false;
+    }
+    final workout = findById(workoutId);
+    if (workout == null) return false;
+    final index = workout.exercises.indexWhere(
+      (item) => item.exercise.id == exerciseId,
+    );
+    if (index < 0) return false;
+    workout.exercises[index] = WorkoutExercise(
+      exercise: workout.exercises[index].exercise,
+      plannedSets: plannedSets,
+      plannedMinRepetitions: plannedMinRepetitions,
+      plannedRepetitions: plannedRepetitions,
+    );
+    store.enqueue((db) async {
+      await db.update(
+        'planned_exercises',
+        {
+          'planned_sets': plannedSets,
+          'planned_min': plannedMinRepetitions,
+          'planned_repetitions': plannedRepetitions,
+        },
+        where: 'uid = ? AND workout_id = ? AND exercise_id = ?',
+        whereArgs: [store.uid, workoutId, exerciseId],
+      );
+    });
+    return true;
+  }
+
+  bool reorderExercise(String workoutId, int oldIndex, int newIndex) {
+    final workout = findById(workoutId);
+    if (workout == null ||
+        oldIndex < 0 ||
+        oldIndex >= workout.exercises.length ||
+        newIndex < 0 ||
+        newIndex >= workout.exercises.length) {
+      return false;
+    }
+    workout.exercises.insert(newIndex, workout.exercises.removeAt(oldIndex));
+    store.enqueue((db) async {
+      for (var i = 0; i < workout.exercises.length; i++) {
+        await db.update(
+          'planned_exercises',
+          {'position': i},
+          where: 'uid = ? AND workout_id = ? AND exercise_id = ?',
+          whereArgs: [store.uid, workoutId, workout.exercises[i].exercise.id],
+        );
+      }
+    });
     return true;
   }
 
@@ -143,6 +243,13 @@ class WorkoutRepository {
     }
 
     workout.exercises.removeWhere((item) => item.exercise.id == exerciseId);
+    store.enqueue((db) async {
+      await db.delete(
+        'planned_exercises',
+        where: 'uid = ? AND workout_id = ? AND exercise_id = ?',
+        whereArgs: [store.uid, workoutId, exerciseId],
+      );
+    });
     return true;
   }
 }
