@@ -161,6 +161,25 @@ class _HomePageState extends State<HomePage> {
                         onStart: () => _openSession(workout?.id),
                       ),
               ),
+              if (workouts.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Text('Todos os treinos'),
+                Expanded(
+                  child: ListView(
+                    children: [
+                      for (final item in workouts)
+                        ListTile(
+                          title: Text(item.name),
+                          subtitle: Text('${item.exercises.length} exercícios'),
+                          trailing: const Icon(Icons.play_arrow),
+                          onTap: item.exercises.isEmpty || activeSession != null
+                              ? null
+                              : () => _openSession(item.id),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),

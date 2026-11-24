@@ -54,16 +54,7 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
         }
         if (value == 'rename') _renameWorkout(workout);
         if (value == 'delete') {
-          final deleted = widget.controller.deleteWorkout(workout.id);
-          if (deleted) {
-            Navigator.of(context).pop();
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Could not delete the workout. Try again.'),
-              ),
-            );
-          }
+          _confirmDelete(workout);
         }
       },
       itemBuilder: (context) => const [
@@ -71,6 +62,39 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
         PopupMenuItem(value: 'delete', child: Text('Delete workout')),
       ],
     );
+  }
+
+  Future<void> _confirmDelete(Workout workout) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir treino?'),
+        content: Text(
+          'O treino ${workout.name} será excluído. O histórico será preservado.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+    final deleted = widget.controller.deleteWorkout(workout.id);
+    if (deleted) {
+      Navigator.of(context).pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not delete the workout. Try again.'),
+        ),
+      );
+    }
   }
 
   Future<void> _renameWorkout(Workout workout) async {
@@ -97,6 +121,82 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
     setState(() {});
   }
 
+  Future<void> _editPlan(Workout workout, String exerciseId) async {
+    final item = workout.exercises.firstWhere(
+      (item) => item.exercise.id == exerciseId,
+    );
+    final sets = TextEditingController(text: '${item.plannedSets}');
+    final minimum = TextEditingController(
+      text: '${item.plannedMinRepetitions}',
+    );
+    final maximum = TextEditingController(text: '${item.plannedRepetitions}');
+    final values = await showDialog<(int, int, int)>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(item.exercise.name),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: sets,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Séries'),
+            ),
+            TextField(
+              controller: minimum,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Repetições mínimas',
+              ),
+            ),
+            TextField(
+              controller: maximum,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Repetições máximas',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final a = int.tryParse(sets.text),
+                  b = int.tryParse(minimum.text),
+                  c = int.tryParse(maximum.text);
+              if (a == null ||
+                  a < 1 ||
+                  b == null ||
+                  b < 1 ||
+                  c == null ||
+                  c < b) {
+                return;
+              }
+              Navigator.pop(context, (a, b, c));
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+    sets.dispose();
+    minimum.dispose();
+    maximum.dispose();
+    if (!mounted || values == null) return;
+    widget.controller.updateExercisePlan(
+      workout.id,
+      exerciseId,
+      values.$1,
+      values.$2,
+      values.$3,
+    );
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final workout =
@@ -114,8 +214,8 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
           padding: const EdgeInsets.only(bottom: 8),
           child: FloatingActionButton.extended(
             onPressed: canModify
-                ? () {
-                    Navigator.push(
+                ? () async {
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => ExerciseSelectionPage(
@@ -125,6 +225,7 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
                         ),
                       ),
                     );
+                    if (mounted) setState(() {});
                   }
                 : _showActiveNotice,
             backgroundColor: canModify
@@ -219,12 +320,22 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
                 ),
                 const SizedBox(height: 16),
                 Expanded(
-                  child: ListView.builder(
+                  child: ReorderableListView.builder(
+                    onReorderItem: (oldIndex, newIndex) {
+                      if (!canModify) return;
+                      widget.controller.reorderExercise(
+                        workout.id,
+                        oldIndex,
+                        newIndex,
+                      );
+                      setState(() {});
+                    },
                     padding: const EdgeInsets.only(bottom: 96),
                     itemCount: workout.exercises.length,
                     itemBuilder: (context, index) {
                       final exercises = workout.exercises[index];
                       return Padding(
+                        key: ValueKey(exercises.exercise.id),
                         padding: const EdgeInsets.only(bottom: 12),
                         child: GlassSurface(
                           child: ListTile(
@@ -240,8 +351,12 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
                               ),
                             ),
                             subtitle: Text(
-                              '${exercises.plannedSets} sets - ${exercises.plannedRepetitions} reps',
+                              '${exercises.plannedSets} séries • ${exercises.plannedMinRepetitions}–${exercises.plannedRepetitions} reps',
                             ),
+                            onTap: canModify
+                                ? () =>
+                                      _editPlan(workout, exercises.exercise.id)
+                                : null,
                             trailing: !canModify
                                 ? null
                                 : IconButton(

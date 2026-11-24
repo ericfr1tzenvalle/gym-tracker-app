@@ -1,4 +1,3 @@
-import 'package:flutter/animation.dart';
 import 'package:gym_tracker_app/repositories/exercise_repository.dart';
 import '../models/exercises.dart';
 

@@ -30,8 +30,8 @@ class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
     final filteredExercises = _selectedMuscleGroup == null
         ? allExercises
         : allExercises
-            .where((exercise) => exercise.muscleGroup == _selectedMuscleGroup)
-            .toList();
+              .where((exercise) => exercise.muscleGroup == _selectedMuscleGroup)
+              .toList();
 
     return Scaffold(
       appBar: GlassAppBar(title: const AppLogo()),
@@ -101,7 +101,98 @@ class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
               child: ListView.separated(
                 itemBuilder: (context, index) {
                   final exercise = filteredExercises[index];
-                  return ListTile(title: Text(exercise.name));
+                  return ListTile(
+                    title: Text(exercise.name),
+                    trailing: const Icon(Icons.add),
+                    onTap: () async {
+                      final sets = TextEditingController(text: '3');
+                      final minReps = TextEditingController(text: '8');
+                      final reps = TextEditingController(text: '12');
+                      final result = await showDialog<(int, int, int)>(
+                        context: context,
+                        builder: (dialogContext) => AlertDialog(
+                          title: Text(exercise.name),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Sugestão: 3 séries de 8–12 repetições',
+                              ),
+                              TextField(
+                                controller: sets,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Séries',
+                                ),
+                              ),
+                              TextField(
+                                controller: minReps,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Repetições mínimas',
+                                ),
+                              ),
+                              TextField(
+                                controller: reps,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Repetições máximas',
+                                ),
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(dialogContext),
+                              child: const Text('Cancelar'),
+                            ),
+                            FilledButton(
+                              onPressed: () {
+                                final count = int.tryParse(sets.text);
+                                final minimum = int.tryParse(minReps.text);
+                                final repetitions = int.tryParse(reps.text);
+                                if (count == null ||
+                                    count < 1 ||
+                                    minimum == null ||
+                                    minimum < 1 ||
+                                    repetitions == null ||
+                                    repetitions < minimum) {
+                                  return;
+                                }
+                                Navigator.pop(dialogContext, (
+                                  count,
+                                  minimum,
+                                  repetitions,
+                                ));
+                              },
+                              child: const Text('Adicionar'),
+                            ),
+                          ],
+                        ),
+                      );
+                      sets.dispose();
+                      minReps.dispose();
+                      reps.dispose();
+                      if (result == null || !context.mounted) return;
+                      final added = widget.controller.addExerciseToWorkout(
+                        widget.workoutId,
+                        exercise,
+                        plannedSets: result.$1,
+                        plannedMinRepetitions: result.$2,
+                        plannedRepetitions: result.$3,
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            added
+                                ? 'Exercício adicionado ao treino.'
+                                : 'Este exercício já está no treino.',
+                          ),
+                        ),
+                      );
+                      if (added) Navigator.pop(context);
+                    },
+                  );
                 },
                 separatorBuilder: (context, index) {
                   return const SizedBox(height: 8);
