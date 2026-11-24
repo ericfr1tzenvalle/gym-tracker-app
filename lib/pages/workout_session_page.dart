@@ -110,6 +110,40 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
     setState(() {});
   }
 
+  Widget _loggedSets(List<WorkoutSet> sets) => ExpansionTile(
+    key: const PageStorageKey('logged-sets'),
+    initiallyExpanded: true,
+    title: Text('Logged sets (${sets.length})'),
+    children: [
+      for (final set in sets)
+        ListTile(
+          title: Text(
+            '${set.exerciseName}: ${set.weight} kg × ${set.repetitions} reps',
+          ),
+          trailing: Wrap(
+            children: [
+              IconButton(
+                onPressed: () => _editSet(set),
+                icon: const Icon(Icons.edit),
+                tooltip: 'Edit set',
+              ),
+              IconButton(
+                onPressed: () {
+                  widget.workoutSessionController.removeSetFromSession(
+                    sessionId: widget.sessionId,
+                    setId: set.id,
+                  );
+                  setState(() {});
+                },
+                icon: const Icon(Icons.delete_outline),
+                tooltip: 'Delete set',
+              ),
+            ],
+          ),
+        ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     final progress = widget.workoutSessionController.getSessionProgress(
@@ -172,33 +206,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                   'All planned sets are logged. You can edit them or finish your workout.',
                 ),
                 const SizedBox(height: 16),
-                for (final set in progress.session.sets)
-                  ListTile(
-                    title: Text(
-                      '${set.exerciseName}: ${set.weight} kg × ${set.repetitions} reps',
-                    ),
-                    trailing: Wrap(
-                      children: [
-                        IconButton(
-                          onPressed: () => _editSet(set),
-                          icon: const Icon(Icons.edit),
-                          tooltip: 'Edit set',
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            widget.workoutSessionController
-                                .removeSetFromSession(
-                                  sessionId: widget.sessionId,
-                                  setId: set.id,
-                                );
-                            setState(() {});
-                          },
-                          icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Delete set',
-                        ),
-                      ],
-                    ),
-                  ),
+                _loggedSets(progress.session.sets),
               ],
             )
           : ListView(
@@ -232,34 +240,7 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                   },
                 ),
                 const SizedBox(height: 20),
-                const Text('Logged sets'),
-                for (final set in progress.session.sets)
-                  ListTile(
-                    title: Text(
-                      '${set.exerciseName}: ${set.weight} kg × ${set.repetitions} reps',
-                    ),
-                    trailing: Wrap(
-                      children: [
-                        IconButton(
-                          onPressed: () => _editSet(set),
-                          icon: const Icon(Icons.edit),
-                          tooltip: 'Edit set',
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            widget.workoutSessionController
-                                .removeSetFromSession(
-                                  sessionId: widget.sessionId,
-                                  setId: set.id,
-                                );
-                            setState(() {});
-                          },
-                          icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Delete set',
-                        ),
-                      ],
-                    ),
-                  ),
+                _loggedSets(progress.session.sets),
               ],
             ),
     );

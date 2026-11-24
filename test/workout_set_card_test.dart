@@ -31,6 +31,8 @@ void main() {
       ),
     );
     final fields = find.byType(TextField);
+    expect(tester.widget<TextField>(fields.at(0)).controller!.text, '0');
+    expect(tester.widget<TextField>(fields.at(1)).controller!.text, '0');
     await tester.enterText(fields.at(0), '10');
     await tester.enterText(fields.at(1), '0');
     await tester.tap(find.text('Register set'));

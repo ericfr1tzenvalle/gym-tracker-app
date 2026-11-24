@@ -55,10 +55,10 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
   void initState() {
     super.initState();
     _weightController = TextEditingController(
-      text: widget.weight?.toString() ?? '',
+      text: widget.weight?.toString() ?? '0',
     );
     _repsController = TextEditingController(
-      text: widget.repetitions?.toString() ?? '',
+      text: widget.repetitions?.toString() ?? '0',
     );
   }
 

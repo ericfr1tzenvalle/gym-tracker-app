@@ -1,3 +1,5 @@
+import 'workout_details.dart';
+import '../controllers/exercise_controller.dart';
 import 'package:flutter/material.dart';
 import '../models/workout_session_status.dart';
 import '../widgets/glass_surface.dart';
@@ -11,6 +13,7 @@ import 'workout_session_page.dart';
 
 class HomePage extends StatefulWidget {
   final WorkoutController controller;
+  final ExerciseController exerciseController;
   final WorkoutSessionController workoutSessionController;
 
   final String username;
@@ -21,6 +24,7 @@ class HomePage extends StatefulWidget {
     required this.username,
     required this.weeklyGoal,
     required this.controller,
+    required this.exerciseController,
     required this.workoutSessionController,
   });
 
@@ -240,6 +244,23 @@ class _HomePageState extends State<HomePage> {
                                   if (mounted && id != null) {
                                     setState(() => _selectedWorkoutId = id);
                                   }
+                                },
+                          onDetails: workout == null
+                              ? null
+                              : () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => WorkoutDetails(
+                                        workout: workout,
+                                        controller: widget.controller,
+                                        exerciseController:
+                                            widget.exerciseController,
+                                        sessionController:
+                                            widget.workoutSessionController,
+                                      ),
+                                    ),
+                                  );
+                                  if (mounted) setState(() {});
                                 },
                           onStart: () => _openSession(workout?.id),
                         ),

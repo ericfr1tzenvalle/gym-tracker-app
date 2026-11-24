@@ -63,6 +63,7 @@ class _AppShellState extends State<AppShell> {
   List<Widget> get _pages => [
     HomePage(
       username: _profile!.username,
+      exerciseController: _exerciseController,
       weeklyGoal: _profile!.goal,
       controller: _workoutController!,
       workoutSessionController: _workoutSessionController!,
