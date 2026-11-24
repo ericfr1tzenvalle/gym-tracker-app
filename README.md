@@ -43,4 +43,4 @@ flutter test
 flutter build apk --release --target-platform android-arm,android-arm64
 ```
 
-Find the APK at `build/app/outputs/flutter-apk/app-release.apk`. It supports ARM Android phones on Android 7 or later.
+Download the [LilGym APK](release/lilgym-release.apk) or find your local build at `build/app/outputs/flutter-apk/app-release.apk`. It supports ARM Android phones on Android 7 or later.
