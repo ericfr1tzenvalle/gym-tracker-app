@@ -254,21 +254,64 @@ class _HomePageState extends State<HomePage> {
               Row(
                 children: [
                   Expanded(
-                    child: _WeeklyStat(
-                      icon: Icons.fitness_center_rounded,
-                      label: 'Weight Lifted',
-                      value: '${volume.toStringAsFixed(1)} kg',
+                    child: _WeeklyTile(
+                      label: 'Workouts Completed',
+                      caption: 'Weekly goal: ${widget.weeklyGoal}',
+                      icon: Icons.event_available_outlined,
+                      metric: SizedBox.square(
+                        dimension: 60,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            TweenAnimationBuilder<double>(
+                              tween: Tween(
+                                end: (completed.length / widget.weeklyGoal)
+                                    .clamp(0.0, 1.0),
+                              ),
+                              duration: const Duration(milliseconds: 450),
+                              curve: Curves.easeOutCubic,
+                              builder: (context, value, _) =>
+                                  CircularProgressIndicator(
+                                    value: value,
+                                    strokeWidth: 4,
+                                    strokeCap: StrokeCap.round,
+                                    backgroundColor: Colors.white12,
+                                  ),
+                            ),
+                            Center(
+                              child: Text(
+                                '${completed.length}',
+                                style: textTheme.headlineSmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: _WeeklyStat(
-                      icon: Icons.event_available_rounded,
-                      label: 'Workouts Completed',
-                      value: '${completed.length} / ${widget.weeklyGoal}',
-                      progress: (completed.length / widget.weeklyGoal).clamp(
-                        0.0,
-                        1.0,
+                    child: _WeeklyTile(
+                      label: 'Weight Lifted',
+                      caption: 'Total training volume',
+                      icon: Icons.fitness_center_rounded,
+                      metric: Text.rich(
+                        TextSpan(
+                          text: volume.toStringAsFixed(
+                            volume == volume.roundToDouble() ? 0 : 1,
+                          ),
+                          style: textTheme.headlineLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: ' kg',
+                              style: textTheme.titleMedium?.copyWith(
+                                color: Colors.white60,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -282,50 +325,55 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _WeeklyStat extends StatelessWidget {
-  const _WeeklyStat({
-    required this.icon,
+class _WeeklyTile extends StatelessWidget {
+  const _WeeklyTile({
     required this.label,
-    required this.value,
-    this.progress,
+    required this.caption,
+    required this.icon,
+    required this.metric,
   });
 
-  final IconData icon;
   final String label;
-  final String value;
-  final double? progress;
+  final String caption;
+  final IconData icon;
+  final Widget metric;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accent = theme.colorScheme.primary;
     return AspectRatio(
       aspectRatio: 1,
       child: GlassSurface(
+        radius: 22,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(13),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: accent.withValues(alpha: .14),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(7),
-                  child: Icon(icon, color: accent, size: 18),
+              Expanded(
+                flex: 3,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: FittedBox(fit: BoxFit.scaleDown, child: metric),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(icon, size: 17, color: theme.colorScheme.primary),
+                  ],
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 6),
               Flexible(
-                flex: 2,
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    value,
-                    style: theme.textTheme.headlineSmall?.copyWith(
+                    label,
+                    style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -335,22 +383,14 @@ class _WeeklyStat extends StatelessWidget {
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
-                  child: Text(label, style: theme.textTheme.labelMedium),
+                  child: Text(
+                    caption,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.white60,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
-              if (progress case final target?)
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: target),
-                  duration: const Duration(milliseconds: 450),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, _) => LinearProgressIndicator(
-                    value: value,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                )
-              else
-                const SizedBox(height: 4),
             ],
           ),
         ),
