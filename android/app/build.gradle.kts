@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
 
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -15,7 +16,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.gym_tracker_app"
+        applicationId = "com.example.gym_tracker"
 
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion

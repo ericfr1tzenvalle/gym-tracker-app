@@ -1,3 +1,4 @@
+import '../models/set_validation.dart';
 import 'package:flutter/material.dart';
 import 'glass_surface.dart';
 import 'package:flutter/services.dart';
@@ -9,9 +10,9 @@ class WorkoutSetCard extends StatefulWidget {
   final int numberOfExercises;
   final int exerciseIndex;
   final String exerciseName;
-  final double weight;
-  final int repetitions;
-  final void Function(double weight, int repetitions) onRegister;
+  final double? weight;
+  final int? repetitions;
+  final bool Function(double weight, int repetitions) onRegister;
 
   const WorkoutSetCard({
     super.key,
@@ -33,6 +34,7 @@ class WorkoutSetCard extends StatefulWidget {
 class _WorkoutSetCardState extends State<WorkoutSetCard> {
   late final TextEditingController _weightController;
   late final TextEditingController _repsController;
+  bool _submitted = false;
 
   double? get _weight =>
       double.tryParse(_weightController.text.replaceAll(',', '.'));
@@ -41,19 +43,23 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
 
   bool get _hasValidWeight {
     final weight = _weight;
-    return weight != null && weight.isFinite && weight > 0;
+    return weight != null && SetValidation.validWeight(weight);
   }
 
   bool get _hasValidRepetitions {
     final repetitions = _repetitions;
-    return repetitions != null && repetitions > 0;
+    return repetitions != null && SetValidation.validRepetitions(repetitions);
   }
 
   @override
   void initState() {
     super.initState();
-    _weightController = TextEditingController(text: '${widget.weight}');
-    _repsController = TextEditingController(text: '${widget.repetitions}');
+    _weightController = TextEditingController(
+      text: widget.weight?.toString() ?? '0',
+    );
+    _repsController = TextEditingController(
+      text: widget.repetitions?.toString() ?? '0',
+    );
   }
 
   @override
@@ -73,10 +79,11 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
   }
 
   void _registerSet() {
+    if (_submitted) return;
     if (!_hasValidWeight || !_hasValidRepetitions) {
       final messages = [
-        if (!_hasValidWeight) 'Enter a weight greater than 0.',
-        if (!_hasValidRepetitions) 'Enter repetitions greater than 0.',
+        if (!_hasValidWeight) 'Enter a weight greater than zero.',
+        if (!_hasValidRepetitions) 'Enter a positive whole number of reps.',
       ];
       FocusManager.instance.primaryFocus?.unfocus();
       ScaffoldMessenger.of(context)
@@ -93,7 +100,7 @@ class _WorkoutSetCardState extends State<WorkoutSetCard> {
     }
 
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    widget.onRegister(_weight!, _repetitions!);
+    _submitted = widget.onRegister(_weight!, _repetitions!);
   }
 
   @override

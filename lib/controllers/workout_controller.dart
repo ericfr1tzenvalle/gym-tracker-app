@@ -1,4 +1,5 @@
 import 'package:gym_tracker_app/models/exercises.dart';
+import '../data/sample_exercises.dart';
 
 import '../models/workouts.dart';
 import '../repositories/workout_repository.dart';
@@ -54,16 +55,44 @@ class WorkoutController {
     Exercise exercise, {
     required int plannedSets,
     required int plannedRepetitions,
+    required int plannedMinRepetitions,
   }) {
     if (!canModifyWorkout(workoutId)) return false;
-    if (plannedRepetitions < 1 || plannedSets < 1) return false;
+    if (plannedMinRepetitions < 1 ||
+        plannedMinRepetitions > plannedRepetitions ||
+        plannedRepetitions < 1 ||
+        plannedSets < 1 ||
+        !sampleExercises.any((item) => item.id == exercise.id)) {
+      return false;
+    }
     return _workoutRepository.addExerciseToWorkout(
       workoutId: workoutId,
       exercise: exercise,
       plannedSets: plannedSets,
       plannedRepetitions: plannedRepetitions,
+      plannedMinRepetitions: plannedMinRepetitions,
     );
   }
+
+  bool updateExercisePlan(
+    String workoutId,
+    String exerciseId,
+    int sets,
+    int minimum,
+    int maximum,
+  ) =>
+      canModifyWorkout(workoutId) &&
+      _workoutRepository.updateExercisePlan(
+        workoutId,
+        exerciseId,
+        sets,
+        minimum,
+        maximum,
+      );
+
+  bool reorderExercise(String workoutId, int oldIndex, int newIndex) =>
+      canModifyWorkout(workoutId) &&
+      _workoutRepository.reorderExercise(workoutId, oldIndex, newIndex);
 
   int? getNextWorkout() {
     final workouts = _workoutRepository.findAll();
@@ -82,7 +111,6 @@ class WorkoutController {
 
     return _workoutRepository.getNextWorkout(lastSession.workoutId);
   }
-
 
   bool removeExerciseFromWorkout(String workoutId, String exerciseId) {
     if (!canModifyWorkout(workoutId)) {

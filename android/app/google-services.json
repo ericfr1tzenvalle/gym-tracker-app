@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "2840130926",
+    "project_id": "lilgym",
+    "storage_bucket": "lilgym.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2840130926:android:dd882b3e1ec55083f7fd7f",
+        "android_client_info": {
+          "package_name": "com.example.gym_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD30-0sw5RrK0ZYH5COxpR3aLypKybR9gk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

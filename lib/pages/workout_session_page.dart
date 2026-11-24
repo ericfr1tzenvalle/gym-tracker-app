@@ -1,3 +1,4 @@
+import '../models/set_validation.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/glass_surface.dart';
@@ -5,6 +6,7 @@ import '../widgets/glass_surface.dart';
 import '../controllers/workout_session_controller.dart';
 import '../widgets/app_logo.dart';
 import '../widgets/workout_session_actions.dart';
+import '../models/workout_set.dart';
 import '../widgets/workout_session_summary.dart';
 import '../widgets/workout_set_card.dart';
 
@@ -46,12 +48,114 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
     setState(() {});
   }
 
+  Future<void> _editSet(WorkoutSet set) async {
+    final weight = TextEditingController(text: set.weight.toString());
+    final reps = TextEditingController(text: set.repetitions.toString());
+    final edited = await showDialog<(double, int)>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit set • ${set.exerciseName}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: weight,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Weight (kg), greater than zero',
+              ),
+            ),
+            TextField(
+              controller: reps,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Reps, positive whole number',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final w = double.tryParse(weight.text.replaceAll(',', '.'));
+              final r = int.tryParse(reps.text);
+              if (w == null ||
+                  !SetValidation.validWeight(w) ||
+                  r == null ||
+                  !SetValidation.validRepetitions(r)) {
+                return;
+              }
+              Navigator.pop(context, (w, r));
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    weight.dispose();
+    reps.dispose();
+    if (edited == null || !mounted) return;
+    widget.workoutSessionController.updateSet(
+      sessionId: widget.sessionId,
+      setId: set.id,
+      weight: edited.$1,
+      repetitions: edited.$2,
+    );
+    setState(() {});
+  }
+
+  Widget _loggedSets(List<WorkoutSet> sets) => ExpansionTile(
+    key: const PageStorageKey('logged-sets'),
+    initiallyExpanded: true,
+    title: Text('Logged sets (${sets.length})'),
+    children: [
+      for (final set in sets)
+        ListTile(
+          title: Text(
+            '${set.exerciseName}: ${set.weight} kg × ${set.repetitions} reps',
+          ),
+          trailing: Wrap(
+            children: [
+              IconButton(
+                onPressed: () => _editSet(set),
+                icon: const Icon(Icons.edit),
+                tooltip: 'Edit set',
+              ),
+              IconButton(
+                onPressed: () {
+                  widget.workoutSessionController.removeSetFromSession(
+                    sessionId: widget.sessionId,
+                    setId: set.id,
+                  );
+                  setState(() {});
+                },
+                icon: const Icon(Icons.delete_outline),
+                tooltip: 'Delete set',
+              ),
+            ],
+          ),
+        ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     final progress = widget.workoutSessionController.getSessionProgress(
       widget.sessionId,
     );
     final exercise = progress?.currentExercise;
+    final showFinishButton =
+        progress != null &&
+        progress.session.isActive &&
+        (exercise == null ||
+            progress.exerciseIndex ==
+                (progress.workout?.exercises.length ?? 0) - 1);
 
     return Scaffold(
       appBar: GlassAppBar(
@@ -65,6 +169,28 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
             ),
         ],
       ),
+      bottomNavigationBar: showFinishButton
+          ? SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(56),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  onPressed: progress.totalCompletedSets == 0
+                      ? null
+                      : () => _endSession(cancel: false),
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('Finish Workout'),
+                ),
+              ),
+            )
+          : null,
       body: progress == null
           ? const Center(child: Text('Session not found'))
           : !progress.session.isActive
@@ -73,16 +199,18 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
               onDone: () => Navigator.of(context).maybePop(),
             )
           : exercise == null
-          ? const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Text(
-                  'No exercises available. Use the workout options to end this session.',
+          ? ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              children: [
+                const Text(
+                  'All planned sets are logged. You can edit them or finish your workout.',
                 ),
-              ),
+                const SizedBox(height: 16),
+                _loggedSets(progress.session.sets),
+              ],
             )
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
               children: [
                 WorkoutSetCard(
                   key: ValueKey(
@@ -90,10 +218,8 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                   ),
                   exerciseName: exercise.exercise.name,
                   setNumber: progress.currentExerciseCompletedSets + 1,
-                  weight: progress.suggestedSet?.weight ?? 0,
-                  repetitions:
-                      progress.suggestedSet?.repetitions ??
-                      exercise.plannedRepetitions,
+                  weight: progress.suggestedSet?.weight,
+                  repetitions: progress.suggestedSet?.repetitions,
                   numberOfExercises: progress.workout!.exercises.length,
                   exerciseIndex: progress.exerciseIndex,
                   plannedSets: exercise.plannedSets,
@@ -110,8 +236,11 @@ class _WorkoutSessionPageState extends State<WorkoutSessionPage> {
                       _showError('Failed to register set.');
                     }
                     setState(() {});
+                    return registered != null;
                   },
                 ),
+                const SizedBox(height: 20),
+                _loggedSets(progress.session.sets),
               ],
             ),
     );
