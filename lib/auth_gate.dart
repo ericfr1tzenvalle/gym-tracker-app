@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'app_shell.dart';
+import 'widgets/app_logo.dart';
+import 'widgets/glass_surface.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -31,44 +33,71 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _form = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  bool _creating = false;
   bool _loading = false;
   String? _error;
 
-  Future<void> _signIn() async {
-    if (_loading) return;
+  Future<void> _submit() async {
+    if (_loading || !_form.currentState!.validate()) return;
+    final creating = _creating;
+    final email = _email.text.trim();
+    final password = _password.text;
+    FocusScope.of(context).unfocus();
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _email.text.trim(),
-        password: _password.text,
-      );
+      final auth = FirebaseAuth.instance;
+      if (creating) {
+        await auth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      } else {
+        await auth.signInWithEmailAndPassword(email: email, password: password);
+      }
     } on FirebaseAuthException catch (error) {
       if (!mounted) return;
       setState(
         () => _error = switch (error.code) {
           'invalid-email' => 'Enter a valid email address.',
+          'email-already-in-use' =>
+            'This email already has an account. Sign in instead.',
+          'weak-password' => 'Choose a stronger password.',
           'invalid-credential' ||
           'wrong-password' ||
           'user-not-found' => 'Invalid email or password.',
           'network-request-failed' =>
-            'Connect to the internet to sign in for the first time.',
-          _ => 'Could not sign in (${error.code}).',
+            'Check your internet connection and try again.',
+          'too-many-requests' => 'Too many attempts. Try again later.',
+          'operation-not-allowed' =>
+            'Email and password authentication is unavailable.',
+          _ =>
+            creating ? 'Could not create your account.' : 'Could not sign in.',
         },
       );
     } catch (_) {
       if (mounted) {
-        setState(
-          () => _error = 'Could not sign in. Check your internet connection.',
-        );
+        setState(() => _error = 'Something went wrong. Try again.');
       }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  void _switchMode() {
+    final email = _email.text;
+    _form.currentState?.reset();
+    _email.text = email;
+    _password.clear();
+    setState(() {
+      _creating = !_creating;
+      _error = null;
+    });
   }
 
   @override
@@ -79,56 +108,120 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('LilGym')),
-    body: SafeArea(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.all(24),
-            children: [
-              const Text(
-                'Sign in to your account',
-                style: TextStyle(fontSize: 24),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _email,
-                keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
-                decoration: const InputDecoration(labelText: 'Email'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _password,
-                obscureText: true,
-                autofillHints: const [AutofillHints.password],
-                decoration: const InputDecoration(labelText: 'Password'),
-                onSubmitted: (_) => _signIn(),
-              ),
-              if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text(
-                    _error!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
+  Widget build(BuildContext context) {
+    final action = _creating ? 'Create Account' : 'Sign In';
+    return Scaffold(
+      appBar: GlassAppBar(title: const AppLogo()),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(20),
+              children: [
+                GlassSurface(
+                  radius: 22,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: AutofillGroup(
+                      child: Form(
+                        key: _form,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              action,
+                              style: const TextStyle(
+                                fontFamily: 'MatchaMint',
+                                fontSize: 20,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            TextFormField(
+                              controller: _email,
+                              enabled: !_loading,
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              autofillHints: const [AutofillHints.email],
+                              decoration: const InputDecoration(
+                                labelText: 'Email',
+                                prefixIcon: Icon(Icons.email_outlined),
+                              ),
+                              validator: (value) => (value ?? '').trim().isEmpty
+                                  ? 'Enter your email address.'
+                                  : null,
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _password,
+                              enabled: !_loading,
+                              obscureText: true,
+                              autofillHints: [
+                                _creating
+                                    ? AutofillHints.newPassword
+                                    : AutofillHints.password,
+                              ],
+                              decoration: const InputDecoration(
+                                labelText: 'Password',
+                                prefixIcon: Icon(Icons.lock_outline),
+                              ),
+                              onFieldSubmitted: (_) => _submit(),
+                              validator: (value) {
+                                if ((value ?? '').isEmpty) {
+                                  return 'Enter your password.';
+                                }
+                                if (_creating && value!.length < 6) {
+                                  return 'Use at least 6 characters.';
+                                }
+                                return null;
+                              },
+                            ),
+                            if (_error != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Text(
+                                  _error!,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: 20),
+                            FilledButton(
+                              onPressed: _loading ? null : _submit,
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size.fromHeight(48),
+                              ),
+                              child: _loading
+                                  ? const SizedBox.square(
+                                      dimension: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(action),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              const SizedBox(height: 20),
-              FilledButton(
-                onPressed: _loading ? null : _signIn,
-                child: _loading
-                    ? const CircularProgressIndicator()
-                    : const Text('Sign In'),
-              ),
-            ],
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: _loading ? null : _switchMode,
+                  child: Text(
+                    _creating
+                        ? 'Already have an account? Sign In'
+                        : 'New to LilGym? Create Account',
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
