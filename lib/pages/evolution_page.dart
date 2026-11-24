@@ -3,8 +3,15 @@ import '../controllers/workout_session_controller.dart';
 import '../models/workout_session_status.dart';
 
 class EvolutionPage extends StatelessWidget {
-  const EvolutionPage({super.key, required this.controller});
+  const EvolutionPage({
+    super.key,
+    required this.controller,
+    this.workoutId,
+    this.workoutName,
+  });
   final WorkoutSessionController controller;
+  final String? workoutId;
+  final String? workoutName;
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +19,9 @@ class EvolutionPage extends StatelessWidget {
         controller
             .getAllSessions()
             .where(
-              (session) => session.status == WorkoutSessionStatus.completed,
+              (session) =>
+                  session.status == WorkoutSessionStatus.completed &&
+                  (workoutId == null || session.workoutId == workoutId),
             )
             .toList()
           ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
@@ -20,7 +29,7 @@ class EvolutionPage extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('History'),
+          title: Text(workoutName == null ? 'History' : '$workoutName History'),
           bottom: TabBar(
             tabs: [
               Tab(text: 'Sessions'),

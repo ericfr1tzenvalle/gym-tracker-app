@@ -129,6 +129,8 @@ class _WorkoutsPageState extends State<WorkoutsPage> {
                                   builder: (context) {
                                     return WorkoutDetails(
                                       workout: treino,
+                                      sessionController:
+                                          widget.sessionController,
                                       controller: widget.controller,
                                       exerciseController:
                                           widget.exerciseController,

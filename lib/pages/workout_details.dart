@@ -1,3 +1,5 @@
+import 'evolution_page.dart';
+import '../controllers/workout_session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:gym_tracker_app/controllers/exercise_controller.dart';
 import 'package:gym_tracker_app/pages/exercise_selection_page.dart';
@@ -9,11 +11,13 @@ import '../widgets/glass_surface.dart';
 
 class WorkoutDetails extends StatefulWidget {
   final Workout workout;
+  final WorkoutSessionController sessionController;
   final WorkoutController controller;
   final ExerciseController exerciseController;
   const WorkoutDetails({
     super.key,
     required this.workout,
+    required this.sessionController,
     required this.controller,
     required this.exerciseController,
   });
@@ -308,7 +312,16 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
                       ),
                     ),
                     TextButton.icon(
-                      onPressed: null,
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (context) => EvolutionPage(
+                            controller: widget.sessionController,
+                            workoutId: workout.id,
+                            workoutName: workout.name,
+                          ),
+                        ),
+                      ),
                       icon: const Icon(Icons.history, size: 18),
                       label: const Text('History'),
                     ),

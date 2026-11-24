@@ -126,9 +126,8 @@ class _AppShellState extends State<AppShell> {
                     ),
 
                     NavigationDestination(
-                      icon: Icon(Icons.bar_chart_outlined),
-                      selectedIcon: Icon(Icons.bar_chart),
-                      label: 'Evolution',
+                      icon: Icon(Icons.history),
+                      label: 'History',
                     ),
                     NavigationDestination(
                       icon: Icon(Icons.person_outline),

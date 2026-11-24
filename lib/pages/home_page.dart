@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/workout_session_status.dart';
+import '../widgets/glass_surface.dart';
 
 import '../widgets/workout_card.dart';
 import '../widgets/workout_card_empty.dart';
@@ -166,58 +167,168 @@ class _HomePageState extends State<HomePage> {
                 width: double.infinity,
                 child: workouts.isEmpty
                     ? WorkoutCardEmpty(onTap: _createWorkout)
-                    : WorkoutCard(
-                        title: workout?.name ?? 'Workout unavailable',
-                        exercises:
-                            workout?.exercises
-                                .map((item) => item.exercise.name)
-                                .toList() ??
-                            const [],
-                        actionLabel: activeSession != null
-                            ? 'Resume Workout'
-                            : 'Start Workout',
-                        onSwap: activeSession != null || alternatives.isEmpty
-                            ? null
-                            : () async {
-                                final id = await showModalBottomSheet<String>(
-                                  context: context,
-                                  useSafeArea: true,
-                                  builder: (context) => ListView(
-                                    shrinkWrap: true,
-                                    children: [
-                                      const ListTile(
-                                        title: Text('Swap Today\'s Workout'),
-                                      ),
-                                      for (final item in alternatives)
-                                        ListTile(
-                                          title: Text(item.name),
-                                          subtitle: Text(
-                                            '${item.exercises.length} exercises',
-                                          ),
-                                          onTap: () =>
-                                              Navigator.pop(context, item.id),
-                                        ),
-                                    ],
+                    : AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 320),
+                        transitionBuilder: (child, animation) => FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position:
+                                Tween(
+                                  begin: const Offset(.06, 0),
+                                  end: Offset.zero,
+                                ).animate(
+                                  CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeOutCubic,
                                   ),
-                                );
-                                if (mounted && id != null) {
-                                  setState(() => _selectedWorkoutId = id);
-                                }
-                              },
-                        onStart: () => _openSession(workout?.id),
+                                ),
+                            child: child,
+                          ),
+                        ),
+                        child: WorkoutCard(
+                          key: ValueKey(workout?.id),
+                          title: workout?.name ?? 'Workout unavailable',
+                          exercises:
+                              workout?.exercises
+                                  .map((item) => item.exercise.name)
+                                  .toList() ??
+                              const [],
+                          actionLabel: activeSession != null
+                              ? 'Resume Workout'
+                              : 'Start Workout',
+                          onSwap: activeSession != null || alternatives.isEmpty
+                              ? null
+                              : () async {
+                                  final id = await showModalBottomSheet<String>(
+                                    context: context,
+                                    useSafeArea: true,
+                                    showDragHandle: true,
+                                    sheetAnimationStyle: const AnimationStyle(
+                                      duration: Duration(milliseconds: 360),
+                                      reverseDuration: Duration(
+                                        milliseconds: 240,
+                                      ),
+                                    ),
+                                    builder: (context) => ListView(
+                                      shrinkWrap: true,
+                                      children: [
+                                        const ListTile(
+                                          leading: Icon(Icons.swap_horiz),
+                                          title: Text('Swap Workout'),
+                                        ),
+                                        for (final item in alternatives)
+                                          ListTile(
+                                            leading: const CircleAvatar(
+                                              child: Icon(
+                                                Icons.fitness_center,
+                                                size: 18,
+                                              ),
+                                            ),
+                                            trailing: const Icon(
+                                              Icons.arrow_forward_rounded,
+                                            ),
+                                            title: Text(item.name),
+                                            subtitle: Text(
+                                              '${item.exercises.length} exercises',
+                                            ),
+                                            onTap: () =>
+                                                Navigator.pop(context, item.id),
+                                          ),
+                                      ],
+                                    ),
+                                  );
+                                  if (mounted && id != null) {
+                                    setState(() => _selectedWorkoutId = id);
+                                  }
+                                },
+                          onStart: () => _openSession(workout?.id),
+                        ),
                       ),
               ),
               const SizedBox(height: 16),
-              ListTile(
-                title: const Text('Weight lifted this week'),
-                subtitle: Text('${volume.toStringAsFixed(1)} kg'),
+              _WeeklyStat(
+                icon: Icons.fitness_center_rounded,
+                label: 'Weight lifted this week',
+                value: '${volume.toStringAsFixed(1)} kg',
               ),
-              ListTile(
-                title: const Text('Workouts completed this week'),
-                subtitle: Text('${completed.length} of ${widget.weeklyGoal}'),
+              const SizedBox(height: 10),
+              _WeeklyStat(
+                icon: Icons.event_available_rounded,
+                label: 'Workouts completed this week',
+                value: '${completed.length} / ${widget.weeklyGoal}',
+                progress: (completed.length / widget.weeklyGoal).clamp(
+                  0.0,
+                  1.0,
+                ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WeeklyStat extends StatelessWidget {
+  const _WeeklyStat({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.progress,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final double? progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final accent = theme.colorScheme.primary;
+    return GlassSurface(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: accent.withValues(alpha: .14),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Icon(icon, color: accent),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: theme.textTheme.labelMedium),
+                  Text(
+                    value,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (progress case final target?) ...[
+                    const SizedBox(height: 7),
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: target),
+                      duration: const Duration(milliseconds: 450),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, value, _) => LinearProgressIndicator(
+                        value: value,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

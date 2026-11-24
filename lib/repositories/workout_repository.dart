@@ -44,6 +44,11 @@ class WorkoutRepository {
         _nextWorkoutId = numericId + 1;
       }
     }
+    // Completed sessions keep their original workout ID after deletion.
+    for (final session in await store.rows('sessions')) {
+      final id = int.tryParse(session['workout_id'] as String);
+      if (id != null && id >= _nextWorkoutId) _nextWorkoutId = id + 1;
+    }
   }
 
   List<Workout> findAll() => List.unmodifiable(_workouts);
