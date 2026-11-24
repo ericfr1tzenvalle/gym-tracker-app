@@ -7,11 +7,15 @@ class AccountDatabase {
   final Database db;
   Future<void> _pending = Future.value();
 
+  static const _profileTable =
+      'CREATE TABLE profiles (uid TEXT PRIMARY KEY, username TEXT NOT NULL, weight REAL NOT NULL, height REAL NOT NULL, goal INTEGER NOT NULL, portrait INTEGER NOT NULL)';
+
   static Future<AccountDatabase> open(String uid) async {
     final db = await openDatabase(
       path.join(await getDatabasesPath(), 'lilgym.db'),
-      version: 2,
+      version: 3,
       onCreate: (db, _) async {
+        await db.execute(_profileTable);
         await db.execute(
           'CREATE TABLE workouts (uid TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, PRIMARY KEY(uid,id))',
         );
@@ -29,6 +33,7 @@ class AccountDatabase {
         );
       },
       onUpgrade: (db, oldVersion, _) async {
+        if (oldVersion < 3) await db.execute(_profileTable);
         if (oldVersion < 2) {
           await db.execute(
             'ALTER TABLE planned_exercises ADD COLUMN planned_min INTEGER NOT NULL DEFAULT 1',

@@ -103,7 +103,6 @@ class _ExerciseSelectionPageState extends State<ExerciseSelectionPage> {
                   final exercise = filteredExercises[index];
                   return ListTile(
                     title: Text(exercise.name),
-                    trailing: const Icon(Icons.add),
                     onTap: () async {
                       final sets = TextEditingController(text: '3');
                       final minReps = TextEditingController(text: '8');

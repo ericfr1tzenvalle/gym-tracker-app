@@ -4,15 +4,19 @@ import '../widgets/workout_list_card.dart';
 import '../widgets/workout_card_empty.dart';
 import '../controllers/workout_controller.dart';
 import 'workout_details.dart';
+import 'evolution_page.dart';
+import '../controllers/workout_session_controller.dart';
 import '../controllers/exercise_controller.dart';
 
 class WorkoutsPage extends StatefulWidget {
   final WorkoutController controller;
   final ExerciseController exerciseController;
+  final WorkoutSessionController sessionController;
   const WorkoutsPage({
     super.key,
     required this.controller,
     required this.exerciseController,
+    required this.sessionController,
   });
 
   @override
@@ -61,13 +65,24 @@ class _WorkoutsPageState extends State<WorkoutsPage> {
                 children: [
                   const Expanded(
                     child: Text(
-                      'Your workouts',
+                      'Workouts',
                       style: TextStyle(
                         fontSize: 16,
                         fontFamily: 'MatchaMint',
                         color: Colors.white,
                       ),
                     ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (context) =>
+                            EvolutionPage(controller: widget.sessionController),
+                      ),
+                    ),
+                    icon: const Icon(Icons.history, size: 18),
+                    label: const Text('History'),
                   ),
                   TextButton.icon(
                     onPressed: _createWorkout,

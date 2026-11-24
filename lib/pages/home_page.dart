@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gym_tracker_app/dev/theme_preview_page.dart';
+import '../models/workout_session_status.dart';
 
 import '../widgets/workout_card.dart';
 import '../widgets/workout_card_empty.dart';
@@ -12,8 +12,13 @@ class HomePage extends StatefulWidget {
   final WorkoutController controller;
   final WorkoutSessionController workoutSessionController;
 
+  final String username;
+  final int weeklyGoal;
+
   const HomePage({
     super.key,
+    required this.username,
+    required this.weeklyGoal,
     required this.controller,
     required this.workoutSessionController,
   });
@@ -23,6 +28,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String? _selectedWorkoutId;
   bool _openingSession = false;
   bool _creationDialogOpen = false;
 
@@ -67,7 +73,11 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       );
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {
+          if (controller.getActiveSession() == null) _selectedWorkoutId = null;
+        });
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -92,16 +102,35 @@ class _HomePageState extends State<HomePage> {
     final activeSession = widget.workoutSessionController.getActiveSession();
     final workout = activeSession != null
         ? widget.controller.getWorkoutById(activeSession.workoutId)
-        : nextWorkout == null
-        ? null
-        : workouts[nextWorkout];
+        : (_selectedWorkoutId == null
+                  ? null
+                  : widget.controller.getWorkoutById(_selectedWorkoutId!)) ??
+              (nextWorkout == null ? null : workouts[nextWorkout]);
+    final now = DateTime.now();
+    final monday = DateTime(now.year, now.month, now.day - now.weekday + 1);
+    final nextMonday = DateTime(monday.year, monday.month, monday.day + 7);
+    final completed = widget.workoutSessionController.getAllSessions().where((
+      session,
+    ) {
+      final date = session.completedAt?.toLocal();
+      return session.status == WorkoutSessionStatus.completed &&
+          date != null &&
+          !date.isBefore(monday) &&
+          date.isBefore(nextMonday);
+    }).toList();
+    final volume = completed
+        .expand((session) => session.sets)
+        .fold<double>(0, (sum, set) => sum + set.weight * set.repetitions);
+    final alternatives = workouts
+        .where((item) => item.id != workout?.id)
+        .toList();
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: 100),
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,9 +139,9 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Welcome back!',
-                          style: TextStyle(
+                        Text(
+                          'Olá, ${widget.username}!',
+                          style: const TextStyle(
                             fontSize: 16,
                             fontFamily: 'MatchaMint',
                             color: Colors.white,
@@ -131,15 +160,36 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const ThemePreviewPage(),
-                        ),
-                      );
-                    },
-                    tooltip: 'See theme preview',
-                    icon: const Icon(Icons.info_outline),
+                    onPressed: activeSession != null || alternatives.isEmpty
+                        ? null
+                        : () async {
+                            final id = await showModalBottomSheet<String>(
+                              context: context,
+                              useSafeArea: true,
+                              builder: (context) => ListView(
+                                shrinkWrap: true,
+                                children: [
+                                  const ListTile(
+                                    title: Text('Trocar treino de hoje'),
+                                  ),
+                                  for (final item in alternatives)
+                                    ListTile(
+                                      title: Text(item.name),
+                                      subtitle: Text(
+                                        '${item.exercises.length} exercícios',
+                                      ),
+                                      onTap: () =>
+                                          Navigator.pop(context, item.id),
+                                    ),
+                                ],
+                              ),
+                            );
+                            if (mounted && id != null) {
+                              setState(() => _selectedWorkoutId = id);
+                            }
+                          },
+                    tooltip: 'Trocar treino',
+                    icon: const Icon(Icons.swap_horiz),
                   ),
                 ],
               ),
@@ -161,25 +211,15 @@ class _HomePageState extends State<HomePage> {
                         onStart: () => _openSession(workout?.id),
                       ),
               ),
-              if (workouts.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                const Text('Todos os treinos'),
-                Expanded(
-                  child: ListView(
-                    children: [
-                      for (final item in workouts)
-                        ListTile(
-                          title: Text(item.name),
-                          subtitle: Text('${item.exercises.length} exercícios'),
-                          trailing: const Icon(Icons.play_arrow),
-                          onTap: item.exercises.isEmpty || activeSession != null
-                              ? null
-                              : () => _openSession(item.id),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
+              const SizedBox(height: 16),
+              ListTile(
+                title: const Text('Peso levantado nesta semana'),
+                subtitle: Text('${volume.toStringAsFixed(1)} kg'),
+              ),
+              ListTile(
+                title: const Text('Treinos concluídos nesta semana'),
+                subtitle: Text('${completed.length} de ${widget.weeklyGoal}'),
+              ),
             ],
           ),
         ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gym_tracker_app/controllers/exercise_controller.dart';
-import 'package:gym_tracker_app/pages/evolution_page.dart';
+import 'pages/account_profile.dart';
 import 'package:gym_tracker_app/pages/home_page.dart';
 import 'package:gym_tracker_app/pages/workouts_page.dart';
 import 'package:gym_tracker_app/repositories/exercise_repository.dart';
@@ -23,6 +22,13 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   AccountDatabase? _store;
+  AccountProfile? _profile;
+
+  Future<void> _saveProfile(AccountProfile profile) async {
+    await profile.save(_store!);
+    if (mounted) setState(() => _profile = profile);
+  }
+
   late final _exerciseRepository = ExerciseRepository();
   late final _exerciseController = ExerciseController(_exerciseRepository);
   WorkoutController? _workoutController;
@@ -35,11 +41,13 @@ class _AppShellState extends State<AppShell> {
     final sessions = SessionRepository(store);
     await workouts.hydrate();
     await sessions.hydrate();
+    final profile = await AccountProfile.load(store);
     if (!mounted) {
       await store.flush();
       return;
     }
     _store = store;
+    _profile = profile;
     _workoutController = WorkoutController(workouts, sessions);
     _workoutSessionController = WorkoutSessionController(sessions, workouts);
   }
@@ -53,21 +61,17 @@ class _AppShellState extends State<AppShell> {
 
   List<Widget> get _pages => [
     HomePage(
+      username: _profile!.username,
+      weeklyGoal: _profile!.goal,
       controller: _workoutController!,
       workoutSessionController: _workoutSessionController!,
     ),
     WorkoutsPage(
       controller: _workoutController!,
       exerciseController: _exerciseController,
+      sessionController: _workoutSessionController!,
     ),
-    EvolutionPage(controller: _workoutSessionController!),
-    Center(
-      child: FilledButton.icon(
-        onPressed: () => FirebaseAuth.instance.signOut(),
-        icon: const Icon(Icons.logout),
-        label: const Text("Sair"),
-      ),
-    ),
+    AccountProfilePage(profile: _profile!, onSave: _saveProfile),
   ];
   int _selectedIndex = 0;
   @override
@@ -87,10 +91,11 @@ class _AppShellState extends State<AppShell> {
             body: Center(child: CircularProgressIndicator()),
           );
         }
+        if (_profile == null) return ProfileSetup(onSave: _saveProfile);
         return Scaffold(
           extendBody: true,
           appBar: GlassAppBar(centerTitle: true, title: const AppLogo()),
-          body: _pages[_selectedIndex],
+          body: IndexedStack(index: _selectedIndex, children: _pages),
 
           bottomNavigationBar: SafeArea(
             top: false,
@@ -116,12 +121,6 @@ class _AppShellState extends State<AppShell> {
                       icon: Icon(Icons.fitness_center_outlined),
                       selectedIcon: Icon(Icons.fitness_center),
                       label: 'Workouts',
-                    ),
-
-                    NavigationDestination(
-                      icon: Icon(Icons.bar_chart_outlined),
-                      selectedIcon: Icon(Icons.bar_chart),
-                      label: 'Evolution',
                     ),
 
                     NavigationDestination(
