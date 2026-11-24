@@ -246,20 +246,33 @@ class _HomePageState extends State<HomePage> {
                       ),
               ),
               const SizedBox(height: 16),
-              _WeeklyStat(
-                icon: Icons.fitness_center_rounded,
-                label: 'Weight lifted this week',
-                value: '${volume.toStringAsFixed(1)} kg',
+              const Text(
+                'This Week',
+                style: TextStyle(fontFamily: 'MatchaMint'),
               ),
-              const SizedBox(height: 10),
-              _WeeklyStat(
-                icon: Icons.event_available_rounded,
-                label: 'Workouts completed this week',
-                value: '${completed.length} / ${widget.weeklyGoal}',
-                progress: (completed.length / widget.weeklyGoal).clamp(
-                  0.0,
-                  1.0,
-                ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _WeeklyStat(
+                      icon: Icons.fitness_center_rounded,
+                      label: 'Weight Lifted',
+                      value: '${volume.toStringAsFixed(1)} kg',
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _WeeklyStat(
+                      icon: Icons.event_available_rounded,
+                      label: 'Workouts Completed',
+                      value: '${completed.length} / ${widget.weeklyGoal}',
+                      progress: (completed.length / widget.weeklyGoal).clamp(
+                        0.0,
+                        1.0,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -286,49 +299,60 @@ class _WeeklyStat extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accent = theme.colorScheme.primary;
-    return GlassSurface(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: accent.withValues(alpha: .14),
+    return AspectRatio(
+      aspectRatio: 1,
+      child: GlassSurface(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: accent.withValues(alpha: .14),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(7),
+                  child: Icon(icon, color: accent, size: 18),
+                ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Icon(icon, color: accent),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, style: theme.textTheme.labelMedium),
-                  Text(
+              const Spacer(),
+              Flexible(
+                flex: 2,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
                     value,
-                    style: theme.textTheme.titleLarge?.copyWith(
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  if (progress case final target?) ...[
-                    const SizedBox(height: 7),
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0, end: target),
-                      duration: const Duration(milliseconds: 450),
-                      curve: Curves.easeOutCubic,
-                      builder: (context, value, _) => LinearProgressIndicator(
-                        value: value,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                  ],
-                ],
+                ),
               ),
-            ),
-          ],
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(label, style: theme.textTheme.labelMedium),
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (progress case final target?)
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: target),
+                  duration: const Duration(milliseconds: 450),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, _) => LinearProgressIndicator(
+                    value: value,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                )
+              else
+                const SizedBox(height: 4),
+            ],
+          ),
         ),
       ),
     );
