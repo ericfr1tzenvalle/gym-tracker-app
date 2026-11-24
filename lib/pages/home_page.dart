@@ -259,7 +259,7 @@ class _HomePageState extends State<HomePage> {
                       caption: 'Weekly goal: ${widget.weeklyGoal}',
                       icon: Icons.event_available_outlined,
                       metric: SizedBox.square(
-                        dimension: 60,
+                        dimension: 76,
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
@@ -281,7 +281,7 @@ class _HomePageState extends State<HomePage> {
                             Center(
                               child: Text(
                                 '${completed.length}',
-                                style: textTheme.headlineSmall,
+                                style: textTheme.headlineMedium,
                               ),
                             ),
                           ],
@@ -300,7 +300,7 @@ class _HomePageState extends State<HomePage> {
                           text: volume.toStringAsFixed(
                             volume == volume.roundToDouble() ? 0 : 1,
                           ),
-                          style: textTheme.headlineLarge?.copyWith(
+                          style: textTheme.displaySmall?.copyWith(
                             fontWeight: FontWeight.w800,
                           ),
                           children: [
@@ -348,21 +348,28 @@ class _WeeklyTile extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(13),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 flex: 3,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Stack(
+                  fit: StackFit.expand,
                   children: [
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
                         child: FittedBox(fit: BoxFit.scaleDown, child: metric),
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Icon(icon, size: 17, color: theme.colorScheme.primary),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Icon(
+                        icon,
+                        size: 16,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -370,7 +377,7 @@ class _WeeklyTile extends StatelessWidget {
               Flexible(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
+                  alignment: Alignment.center,
                   child: Text(
                     label,
                     style: theme.textTheme.titleSmall?.copyWith(
@@ -382,7 +389,7 @@ class _WeeklyTile extends StatelessWidget {
               Flexible(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
+                  alignment: Alignment.center,
                   child: Text(
                     caption,
                     style: theme.textTheme.bodySmall?.copyWith(

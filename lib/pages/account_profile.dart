@@ -41,29 +41,6 @@ class ProfilePortrait extends StatelessWidget {
   final double radius;
 
   static const count = 8;
-  // The first three source images are already monochrome.
-  static const _grayscale = ColorFilter.matrix([
-    .2126,
-    .7152,
-    .0722,
-    0,
-    0,
-    .2126,
-    .7152,
-    .0722,
-    0,
-    0,
-    .2126,
-    .7152,
-    .0722,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-  ]);
 
   @override
   Widget build(BuildContext context) {
@@ -75,11 +52,7 @@ class ProfilePortrait extends StatelessWidget {
       errorBuilder: (context, error, stack) =>
           CircleAvatar(radius: radius, child: const Icon(Icons.person)),
     );
-    return ClipOval(
-      child: index < 3
-          ? image
-          : ColorFiltered(colorFilter: _grayscale, child: image),
-    );
+    return ClipOval(child: image);
   }
 }
 
@@ -423,12 +396,58 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
     return 'Measurements updated.';
   });
 
+  Future<void> _changePortrait() => _run(() async {
+    final profile = widget.profile;
+    final selected = await showDialog<int>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Change Portrait'),
+        scrollable: true,
+        content: PortraitChoices(
+          selected: profile.portrait,
+          onSelect: (index) => Navigator.pop(context, index),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || selected == null || selected == profile.portrait) {
+      return null;
+    }
+    await widget.onSave(
+      AccountProfile(
+        profile.username,
+        profile.weight,
+        profile.height,
+        profile.goal,
+        selected,
+      ),
+    );
+    return 'Portrait updated.';
+  });
+
   @override
   Widget build(BuildContext context) => ListView(
     padding: const EdgeInsets.fromLTRB(20, 20, 20, 110),
     children: [
       Center(child: ProfilePortrait(widget.profile.portrait, radius: 52)),
       const SizedBox(height: 12),
+      Text(
+        widget.profile.username,
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
+      const SizedBox(height: 12),
+      ListTile(
+        leading: const Icon(Icons.account_circle_outlined),
+        title: const Text('Change Portrait'),
+        enabled: !_busy,
+        onTap: _changePortrait,
+      ),
       ListTile(
         leading: const Icon(Icons.straighten),
         title: const Text('Edit Measurements'),
